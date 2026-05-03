@@ -331,6 +331,8 @@ public static class HostGuardUI
         HdrToggle(y, "BOT PROTECTION", HostGuardConfig.BotProtectionEnabled); y -= 0.3f;
         Row(y, "Known Bots Ban", HostGuardConfig.BanKnownBots, null); y -= rowH;
         Row(y, "Cosmetic Detect", HostGuardConfig.CosmeticDetectionEnabled, HostGuardConfig.BanForSuspiciousCosmetics); y -= rowH;
+        TxtRow(y, "Bot Names (comma-separated)", HostGuardConfig.KnownBotNames); y -= rowH;
+        TxtRow(y, "Bot URLs (comma-separated)", HostGuardConfig.KnownBotUrls); y -= rowH;
 
         // --- FLOOD PROTECTION ---
         HdrToggle(y, "FLOOD PROTECTION", HostGuardConfig.FloodProtectionEnabled); y -= 0.3f;
@@ -361,6 +363,7 @@ public static class HostGuardUI
         NumRow(y, "Start Players", HostGuardConfig.AutoStartPlayerCount, 0, 15, 1); y -= rowH;
         Row(y, "Rules on Start", HostGuardConfig.SendRulesOnLobbyStart, null); y -= rowH;
         Row(y, "Join Notifs", HostGuardConfig.VerboseJoinNotifications, null); y -= rowH;
+        TxtRow(y, "Ban List URL", HostGuardConfig.BanListUrl); y -= rowH;
 
         // --- WHITELIST ---
         MakeLabel(_rowsContainer.transform, "WHITELIST", new Vector3(_panelLeft + 0.12f, y, -100f),
@@ -534,6 +537,17 @@ public static class HostGuardUI
         MakeLabel(_rowsContainer.transform, label, new Vector3(lx, y, -100f), 1.05f, Color.white, TextAlignmentOptions.Left, 501);
         MakeSmallToggle(_rowsContainer.transform, banCfg, new Vector3(togX, y, -100f), "BAN", "KICK",
             new Color(0.85f, 0.25f, 0.1f), new Color(0.85f, 0.7f, 0.1f));
+    }
+
+    private static void TxtRow(float y, string label, ConfigEntry<string> cfg)
+    {
+        if (_rowsContainer == null) return;
+        float lx = _panelLeft + 0.12f;
+        MakeLabel(_rowsContainer.transform, label, new Vector3(lx, y, -100f), 1.05f, Color.white, TextAlignmentOptions.Left, 501);
+        string display = cfg.Value;
+        if (display.Length > 30) display = display.Substring(0, 27) + "...";
+        MakeLabel(_rowsContainer.transform, display, new Vector3(lx + _panelW * 0.45f, y, -100f),
+            0.85f, Dim, TextAlignmentOptions.Left, 501);
     }
 
     private static void NumRow(float y, string label, ConfigEntry<int> cfg, int min, int max, int step)
