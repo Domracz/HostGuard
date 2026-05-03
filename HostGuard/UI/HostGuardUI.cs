@@ -172,6 +172,8 @@ public static class HostGuardUI
         if (_panel == null) return;
         bool open = !_panel.activeSelf;
         _panel.SetActive(open);
+        if (open && _settingsTab)
+            RebuildSettings();
         if (!open && PlayerControl.LocalPlayer != null)
             PlayerControl.LocalPlayer.moveable = true;
     }
