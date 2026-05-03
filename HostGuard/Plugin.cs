@@ -27,7 +27,7 @@ public class HostGuardPlugin : BasePlugin
         };
 
         Logger.LogInfo("HostGuard 3.0.0 loaded.");
-        Logger.LogInfo($"[HostGuard] ChatFilter: Words=[{HostGuardConfig.BannedWords.Value}], Contains={HostGuardConfig.ContainsMode.Value}, Ban={HostGuardConfig.BanForBannedWords.Value}");
+        Logger.LogInfo($"[HostGuard] ChatFilter: ExactWords=[{HostGuardConfig.BannedWords.Value}], ContainsWords=[{HostGuardConfig.BannedWordsContains.Value}], Ban={HostGuardConfig.BanForBannedWords.Value}");
         Logger.LogInfo($"[HostGuard] NameFilter: BadWords=[{HostGuardConfig.BadNameWords.Value}], Ban={HostGuardConfig.BanForBadName.Value}");
         Logger.LogInfo($"[HostGuard] NameFilter: DefaultNames={HostGuardConfig.KickDefaultNames.Value}, Ban={HostGuardConfig.BanForDefaultName.Value}");
         Logger.LogInfo($"[HostGuard] AutoStart: Enabled={HostGuardConfig.AutoStartEnabled.Value}, Count={HostGuardConfig.AutoStartPlayerCount.Value}");

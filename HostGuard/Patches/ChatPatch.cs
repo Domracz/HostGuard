@@ -34,11 +34,12 @@ public static class ChatPatch
 
         // Banned words check (gated by ChatFilter master toggle)
         if (!HostGuardConfig.ChatFilterEnabled.Value) return;
-        List<string> banned = HostGuardConfig.GetBannedWordsList();
+        List<string> exactWords = HostGuardConfig.GetBannedWordsList();
+        List<string> containsWords = HostGuardConfig.GetContainsBannedWords();
 
-        bool triggered = HostGuardConfig.ContainsMode.Value
-            ? banned.Any(w => msg.Contains(w))
-            : banned.Contains(msg);
+        if (exactWords.Count == 0 && containsWords.Count == 0) return;
+
+        bool triggered = exactWords.Contains(msg) || containsWords.Any(w => msg.Contains(w));
 
         if (!triggered) return;
 

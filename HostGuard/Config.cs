@@ -12,11 +12,12 @@ public static class HostGuardConfig
 
     // Chat filter
     public static ConfigEntry<string> BannedWords = null!;
-    public static ConfigEntry<bool> ContainsMode = null!;
+    public static ConfigEntry<string> BannedWordsContains = null!;
     public static ConfigEntry<bool> BanForBannedWords = null!;
 
     // Name filter
     public static ConfigEntry<string> BadNameWords = null!;
+    public static ConfigEntry<string> BannedNamesContains = null!;
     public static ConfigEntry<bool> BanForBadName = null!;
     public static ConfigEntry<bool> KickDefaultNames = null!;
     public static ConfigEntry<bool> BanForDefaultName = null!;
@@ -82,8 +83,12 @@ public static class HostGuardConfig
 
     private static string _bannedWordsRaw = "";
     private static List<string> _bannedWordsCache = new();
+    private static string _bannedWordsContainsRaw = "";
+    private static List<string> _bannedWordsContainsCache = new();
     private static string _badNameWordsRaw = "";
     private static List<string> _badNameWordsCache = new();
+    private static string _bannedNamesContainsRaw = "";
+    private static List<string> _bannedNamesContainsCache = new();
     private static string _whitelistRaw = "";
     private static HashSet<string> _whitelistCache = new(StringComparer.OrdinalIgnoreCase);
     private static string _knownBotNamesRaw = "";
@@ -112,11 +117,11 @@ public static class HostGuardConfig
         // Chat filter
         BannedWords = config.Bind(
             "ChatFilter", "BannedWords", "start",
-            "Words that get a player kicked/banned. Comma-separated, case-insensitive."
+            "Exact match banned words -- triggers only if entire message equals a word. Comma-separated, case-insensitive."
         );
-        ContainsMode = config.Bind(
-            "ChatFilter", "ContainsMode", false,
-            "If true, triggers if message CONTAINS a banned word. If false, only exact matches."
+        BannedWordsContains = config.Bind(
+            "ChatFilter", "BannedWordsContains", "",
+            "Contains match banned words -- triggers if message contains the substring. Comma-separated, case-insensitive."
         );
         BanForBannedWords = config.Bind(
             "ChatFilter", "BanInsteadOfKick", false,
@@ -126,7 +131,11 @@ public static class HostGuardConfig
         // Name filter
         BadNameWords = config.Bind(
             "NameFilter", "BadNameWords", "hitler,nigger,nigga,fucker,faggot,retard,kys,chink,spic,wetback,tranny,kike,gook,coon,nonce,pedo,rapist,rape,nazi,kkk,whore,cunt,slut",
-            "If a player's name contains any of these words they get kicked on join. Comma-separated, case-insensitive."
+            "Exact match banned names -- triggers only if player name exactly equals a word. Comma-separated, case-insensitive."
+        );
+        BannedNamesContains = config.Bind(
+            "NameFilter", "BannedNamesContains", "",
+            "Contains match banned names -- triggers if player name contains the substring. Comma-separated, case-insensitive."
         );
         BanForBadName = config.Bind(
             "NameFilter", "BanForBadName", false,
@@ -312,6 +321,17 @@ public static class HostGuardConfig
         return _bannedWordsCache;
     }
 
+    public static List<string> GetContainsBannedWords()
+    {
+        string raw = BannedWordsContains.Value;
+        if (raw != _bannedWordsContainsRaw)
+        {
+            _bannedWordsContainsRaw = raw;
+            _bannedWordsContainsCache = raw.Split(',').Select(w => w.Trim().ToLower()).Where(w => w.Length > 0).ToList();
+        }
+        return _bannedWordsContainsCache;
+    }
+
     public static HashSet<string> GetWhitelistedCodes()
     {
         string raw = WhitelistedCodes.Value;
@@ -356,6 +376,17 @@ public static class HostGuardConfig
         return _badNameWordsCache;
     }
 
+    public static List<string> GetContainsBannedNames()
+    {
+        string raw = BannedNamesContains.Value;
+        if (raw != _bannedNamesContainsRaw)
+        {
+            _bannedNamesContainsRaw = raw;
+            _bannedNamesContainsCache = raw.Split(',').Select(w => w.Trim().ToLower()).Where(w => w.Length > 0).ToList();
+        }
+        return _bannedNamesContainsCache;
+    }
+
     public static bool AddBannedWord(string word)
     {
         string lower = word.Trim().ToLower();
@@ -396,6 +427,46 @@ public static class HostGuardConfig
         return true;
     }
 
+    public static bool AddContainsBannedWord(string word)
+    {
+        string lower = word.Trim().ToLower();
+        if (lower.Length == 0) return false;
+        var words = GetContainsBannedWords();
+        if (words.Contains(lower)) return false;
+        words.Add(lower);
+        BannedWordsContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool RemoveContainsBannedWord(string word)
+    {
+        string lower = word.Trim().ToLower();
+        var words = GetContainsBannedWords();
+        if (!words.Remove(lower)) return false;
+        BannedWordsContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool AddContainsBannedName(string word)
+    {
+        string lower = word.Trim().ToLower();
+        if (lower.Length == 0) return false;
+        var words = GetContainsBannedNames();
+        if (words.Contains(lower)) return false;
+        words.Add(lower);
+        BannedNamesContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool RemoveContainsBannedName(string word)
+    {
+        string lower = word.Trim().ToLower();
+        var words = GetContainsBannedNames();
+        if (!words.Remove(lower)) return false;
+        BannedNamesContains.Value = string.Join(",", words);
+        return true;
+    }
+
     public static List<string> GetKnownBotNamesList()
     {
         string raw = KnownBotNames.Value;
@@ -427,12 +498,13 @@ public static class HostGuardConfig
             ("Name Filter", "Ban Default Names", BanForDefaultName, typeof(bool)),
             ("Name Filter", "Strict Casing", StrictDefaultNameCasing, typeof(bool)),
             ("Name Filter", "Ban Bad Names", BanForBadName, typeof(bool)),
-            ("Name Filter", "Bad Name Words", BadNameWords, typeof(string)),
+            ("Name Filter", "Exact Match Names (comma-separated)", BadNameWords, typeof(string)),
+            ("Name Filter", "Contains Match Names (comma-separated)", BannedNamesContains, typeof(string)),
 
             // Chat Filter
             ("Chat Filter", "Ban for Banned Words", BanForBannedWords, typeof(bool)),
-            ("Chat Filter", "Contains Mode", ContainsMode, typeof(bool)),
-            ("Chat Filter", "Banned Words", BannedWords, typeof(string)),
+            ("Chat Filter", "Exact Match List (comma-separated)", BannedWords, typeof(string)),
+            ("Chat Filter", "Contains List (comma-separated)", BannedWordsContains, typeof(string)),
 
             // Bot Protection
             ("Bot Protection", "Ban Known Bots", BanKnownBots, typeof(bool)),

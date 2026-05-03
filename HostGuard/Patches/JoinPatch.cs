@@ -88,12 +88,14 @@ public static class JoinPatch
             return;
         }
 
-        // Bad name check (gated by NameFilter master toggle)
-        List<string> badWords = HostGuardConfig.GetBadNameWordsList();
-        if (HostGuardConfig.NameFilterEnabled.Value && badWords.Count > 0)
+        // Bad name check (exact match + contains match, gated by NameFilter master toggle)
+        List<string> exactNames = HostGuardConfig.GetBadNameWordsList();
+        List<string> containsNames = HostGuardConfig.GetContainsBannedNames();
+        if (HostGuardConfig.NameFilterEnabled.Value && (exactNames.Count > 0 || containsNames.Count > 0))
         {
             string lowerName = name.ToLower();
-            string? match = badWords.FirstOrDefault(w => lowerName.Contains(w));
+            string? match = exactNames.FirstOrDefault(w => lowerName == w)
+                         ?? containsNames.FirstOrDefault(w => lowerName.Contains(w));
             if (match != null)
             {
                 bool ban = HostGuardConfig.BanForBadName.Value;
