@@ -73,6 +73,9 @@ public static class HostGuardConfig
     public static ConfigEntry<int> MinLevel = null!;
     public static ConfigEntry<bool> BanForLowLevel = null!;
 
+    // UI
+    public static ConfigEntry<bool> ShowNotifications = null!;
+
     // Lobby
     public static ConfigEntry<bool> AutoReturnToLobby = null!;
     public static ConfigEntry<float> AutoReturnDelay = null!;
@@ -290,6 +293,12 @@ public static class HostGuardConfig
             "Seconds to wait after game ends before auto-clicking to return to lobby."
         );
 
+        // UI
+        ShowNotifications = config.Bind(
+            "UI", "ShowNotifications", true,
+            "If true, shows brief toast notifications in the top-left HUD when HostGuard takes action."
+        );
+
     }
 
     public static List<string> GetBannedWordsList()
@@ -453,6 +462,9 @@ public static class HostGuardConfig
             // Lobby
             ("Lobby", "Auto-Return to Lobby", AutoReturnToLobby, typeof(bool)),
             ("Lobby", "Auto-Return Delay (sec)", AutoReturnDelay, typeof(float)),
+
+            // UI
+            ("UI", "Show Notifications", ShowNotifications, typeof(bool)),
 
             // General
             ("General", "Auto-Start", AutoStartEnabled, typeof(bool)),

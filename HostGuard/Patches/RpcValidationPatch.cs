@@ -155,7 +155,11 @@ public static class RpcValidationPatch
 
         var client = AmongUsClient.Instance.GetClient(player.OwnerId);
         if (client != null)
-            AmongUsClient.Instance.KickPlayer(client.Id, HostGuardConfig.BanOnInvalidRpc.Value);
+        {
+            bool ban = HostGuardConfig.BanOnInvalidRpc.Value;
+            AmongUsClient.Instance.KickPlayer(client.Id, ban);
+            NotificationManager.Show($"{playerName} was {(ban ? "banned" : "kicked")} (invalid RPC)");
+        }
     }
 
     public static void Reset()

@@ -24,18 +24,21 @@ public static class CreatePlayerPatch
             {
                 CrashLog.Write($"[CreatePlayer] BLOCKED — no friend code");
                 AmongUsClient.Instance.KickPlayer(id, true);
+                NotificationManager.Show($"{name} was banned (no friend code)");
                 return false;
             }
             if (FloodGuard.IsSessionBanned(code))
             {
                 CrashLog.Write($"[CreatePlayer] BLOCKED — session banned");
                 AmongUsClient.Instance.KickPlayer(id, true);
+                NotificationManager.Show($"{name} was banned (session banned)");
                 return false;
             }
             if (Blacklist.Contains(code))
             {
                 CrashLog.Write($"[CreatePlayer] BLOCKED — blacklisted");
                 AmongUsClient.Instance.KickPlayer(id, true);
+                NotificationManager.Show($"{name} was banned (blacklisted)");
                 return false;
             }
             return true;

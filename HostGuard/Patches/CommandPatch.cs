@@ -232,6 +232,7 @@ public static class CommandPatch
         {
             HostGuardConfig.AddToWhitelist(identifier);
             ChatHelper.SendLocalMessage($"Added {identifier} to whitelist.");
+            NotificationManager.Show($"{identifier} added to whitelist");
             return;
         }
 
@@ -243,6 +244,7 @@ public static class CommandPatch
         }
         HostGuardConfig.AddToWhitelist(target.Data.FriendCode);
         ChatHelper.SendLocalMessage($"Added {target.Data.PlayerName} ({target.Data.FriendCode}) to whitelist.");
+        NotificationManager.Show($"{target.Data.PlayerName} added to whitelist");
     }
 
     static void HandleUnwhitelist(string identifier)

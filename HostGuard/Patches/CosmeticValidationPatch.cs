@@ -103,7 +103,10 @@ public static class SetOutfitPatch
             FloodGuard.SessionBan(code);
             var client = AmongUsClient.Instance.GetClient(player.OwnerId);
             if (client != null)
+            {
                 AmongUsClient.Instance.KickPlayer(client.Id, true);
+                NotificationManager.Show($"{name} was banned (invalid cosmetic)");
+            }
         }
         catch { }
     }

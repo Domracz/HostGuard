@@ -27,6 +27,7 @@ public static class ChatPatch
             {
                 ChatHelper.SendLocalMessage($"[Bot] Banned {sourcePlayer.Data.PlayerName} — bot URL detected.");
                 AmongUsClient.Instance.KickPlayer(urlClient.Id, true);
+                NotificationManager.Show($"{sourcePlayer.Data.PlayerName} was banned (bot URL)");
             }
             return;
         }
@@ -46,6 +47,9 @@ public static class ChatPatch
 
         var client = AmongUsClient.Instance.GetClient(sourcePlayer.OwnerId);
         if (client != null)
+        {
             AmongUsClient.Instance.KickPlayer(client.Id, ban);
+            NotificationManager.Show($"{sourcePlayer.Data.PlayerName} was {(ban ? "banned" : "kicked")} (banned word)");
+        }
     }
 }

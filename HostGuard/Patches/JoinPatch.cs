@@ -25,6 +25,7 @@ public static class JoinPatch
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] Banning {name} — no friend code.");
             ChatHelper.SendLocalMessage($"[Bot] Banned {name} — no friend code.");
             AmongUsClient.Instance.KickPlayer(data.Id, true);
+            NotificationManager.Show($"{name} was banned (no friend code)");
             return;
         }
 
@@ -33,6 +34,7 @@ public static class JoinPatch
         {
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] Banning {name} ({code}) — session blacklisted.");
             AmongUsClient.Instance.KickPlayer(data.Id, true);
+            NotificationManager.Show($"{name} was banned (session banned)");
             return;
         }
 
@@ -52,6 +54,7 @@ public static class JoinPatch
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — known bot name.");
             ChatHelper.SendLocalMessage($"[Bot] {(ban ? "Banned" : "Kicked")} known bot: {name}");
             AmongUsClient.Instance.KickPlayer(data.Id, ban);
+            NotificationManager.Show($"{name} was {(ban ? "banned" : "kicked")} (bot detected)");
             return;
         }
 
@@ -62,6 +65,7 @@ public static class JoinPatch
             ChatHelper.SendLocalMessage($"[Flood] Banned {name} — flood attack.");
             FloodGuard.SessionBan(code);
             AmongUsClient.Instance.KickPlayer(data.Id, true);
+            NotificationManager.Show($"{name} was banned (flood attack)");
             return;
         }
 
@@ -70,6 +74,7 @@ public static class JoinPatch
         {
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] Banning {name} ({code}) — found in local blacklist.");
             AmongUsClient.Instance.KickPlayer(data.Id, true);
+            NotificationManager.Show($"{name} was banned (blacklisted)");
             return;
         }
 
@@ -79,6 +84,7 @@ public static class JoinPatch
         {
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] Banning {name} ({code}) — found in ban list.");
             AmongUsClient.Instance.KickPlayer(data.Id, true);
+            NotificationManager.Show($"{name} was banned (ban list)");
             return;
         }
 
@@ -93,6 +99,7 @@ public static class JoinPatch
                 bool ban = HostGuardConfig.BanForBadName.Value;
                 HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — bad name: '{match}'");
                 AmongUsClient.Instance.KickPlayer(data.Id, ban);
+                NotificationManager.Show($"{name} was {(ban ? "banned" : "kicked")} (bad name)");
                 return;
             }
         }
@@ -103,6 +110,7 @@ public static class JoinPatch
             bool ban = HostGuardConfig.BanForDefaultName.Value;
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — default name detected.");
             AmongUsClient.Instance.KickPlayer(data.Id, ban);
+            NotificationManager.Show($"{name} was {(ban ? "banned" : "kicked")} (default name)");
             return;
         }
 
@@ -116,6 +124,7 @@ public static class JoinPatch
                 HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — level {level} below minimum {minLvl}.");
                 ChatHelper.SendLocalMessage($"[Level] {(ban ? "Banned" : "Kicked")} {name} — level {level} < {minLvl}");
                 AmongUsClient.Instance.KickPlayer(data.Id, ban);
+                NotificationManager.Show($"{name} was {(ban ? "banned" : "kicked")} (low level)");
                 return;
             }
         }

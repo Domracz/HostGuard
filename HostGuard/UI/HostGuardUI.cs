@@ -50,6 +50,9 @@ public static class HostGuardUI
     private static string _hudSortingLayer = "";
     private static bool _sortingLayerDiscovered;
 
+    internal static Material? HudSpriteMaterial => _hudSpriteMaterial;
+    internal static string HudSortingLayer => _hudSortingLayer;
+
     // Panel layout (computed from camera)
     private static float _panelCX, _panelLeft, _panelW, _panelH, _contentTop;
 
@@ -364,6 +367,11 @@ public static class HostGuardUI
         Row(y, "Rules on Start", HostGuardConfig.SendRulesOnLobbyStart, null); y -= rowH;
         Row(y, "Join Notifs", HostGuardConfig.VerboseJoinNotifications, null); y -= rowH;
         TxtRow(y, "Ban List URL", HostGuardConfig.BanListUrl); y -= rowH;
+
+        // --- UI ---
+        MakeLabel(_rowsContainer.transform, "UI", new Vector3(_panelLeft + 0.12f, y, -100f),
+            1.2f, HdrColor, TextAlignmentOptions.Left, 501); y -= 0.3f;
+        Row(y, "Notifications", HostGuardConfig.ShowNotifications, null); y -= rowH;
 
         // --- LOBBY ---
         MakeLabel(_rowsContainer.transform, "LOBBY", new Vector3(_panelLeft + 0.12f, y, -100f),

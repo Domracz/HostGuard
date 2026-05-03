@@ -19,5 +19,6 @@ public static class HudUpdatePatch
     public static void Postfix()
     {
         HostGuardUI.UpdateVisibility();
+        NotificationManager.Update();
     }
 }
