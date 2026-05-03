@@ -138,6 +138,68 @@ public static class UIFactory
         return container;
     }
 
+    public static GameObject CreateFloatStepper(
+        Transform parent, string name, string label,
+        float initialValue, float min, float max, float step,
+        Action<float> onChange, Vector3 position)
+    {
+        var container = new GameObject(name);
+        container.transform.SetParent(parent);
+        container.transform.localPosition = position;
+        container.transform.localScale = Vector3.one;
+
+        float currentValue = initialValue;
+
+        var labelObj = CreateTextLabel(container.transform, label, new Vector3(-1.2f, 0f, 0f), 1.6f, TextAlignmentOptions.Right);
+
+        var valueObj = CreateTextLabel(container.transform, currentValue.ToString("F1"), new Vector3(0.3f, 0f, 0f), 2f, TextAlignmentOptions.Center);
+        var valueTmp = valueObj.GetComponent<TextMeshPro>();
+
+        var minusBtn = Object.Instantiate(_toggleTemplate, container.transform);
+        minusBtn.name = "Minus";
+        minusBtn.transform.localPosition = new Vector3(-0.15f, 0f, 0f);
+        minusBtn.transform.localScale = new Vector3(0.2f, 0.6f, 1f);
+        minusBtn.Text.text = "-";
+        minusBtn.Text.fontSizeMin = minusBtn.Text.fontSizeMax = 3f;
+        minusBtn.Text.transform.localScale = new Vector3(1f / 0.2f, 1f / 0.6f, 1f);
+        minusBtn.Background.color = Palette.ImpostorRed;
+        minusBtn.gameObject.SetActive(true);
+        var minusPassive = minusBtn.GetComponent<PassiveButton>();
+        if (minusPassive != null)
+        {
+            minusPassive.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+            minusPassive.OnClick.AddListener((Action)(() =>
+            {
+                currentValue = Math.Max(min, currentValue - step);
+                valueTmp.text = currentValue.ToString("F1");
+                onChange(currentValue);
+            }));
+        }
+
+        var plusBtn = Object.Instantiate(_toggleTemplate, container.transform);
+        plusBtn.name = "Plus";
+        plusBtn.transform.localPosition = new Vector3(0.75f, 0f, 0f);
+        plusBtn.transform.localScale = new Vector3(0.2f, 0.6f, 1f);
+        plusBtn.Text.text = "+";
+        plusBtn.Text.fontSizeMin = plusBtn.Text.fontSizeMax = 3f;
+        plusBtn.Text.transform.localScale = new Vector3(1f / 0.2f, 1f / 0.6f, 1f);
+        plusBtn.Background.color = Color.green;
+        plusBtn.gameObject.SetActive(true);
+        var plusPassive = plusBtn.GetComponent<PassiveButton>();
+        if (plusPassive != null)
+        {
+            plusPassive.OnClick = new UnityEngine.UI.Button.ButtonClickedEvent();
+            plusPassive.OnClick.AddListener((Action)(() =>
+            {
+                currentValue = Math.Min(max, currentValue + step);
+                valueTmp.text = currentValue.ToString("F1");
+                onChange(currentValue);
+            }));
+        }
+
+        return container;
+    }
+
     public static GameObject CreateTextDisplay(
         Transform parent, string name, string label,
         string initialValue, Vector3 position)

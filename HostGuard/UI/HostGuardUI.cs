@@ -365,6 +365,12 @@ public static class HostGuardUI
         Row(y, "Join Notifs", HostGuardConfig.VerboseJoinNotifications, null); y -= rowH;
         TxtRow(y, "Ban List URL", HostGuardConfig.BanListUrl); y -= rowH;
 
+        // --- LOBBY ---
+        MakeLabel(_rowsContainer.transform, "LOBBY", new Vector3(_panelLeft + 0.12f, y, -100f),
+            1.2f, HdrColor, TextAlignmentOptions.Left, 501); y -= 0.3f;
+        Row(y, "Auto Return", HostGuardConfig.AutoReturnToLobby, null); y -= rowH;
+        FloatRow(y, "Return Delay", HostGuardConfig.AutoReturnDelay, 0f, 30f, 0.5f); y -= rowH;
+
         // --- WHITELIST ---
         MakeLabel(_rowsContainer.transform, "WHITELIST", new Vector3(_panelLeft + 0.12f, y, -100f),
             1.2f, HdrColor, TextAlignmentOptions.Left, 501); y -= 0.28f;
@@ -578,6 +584,29 @@ public static class HostGuardUI
         var name = PlayerControl.LocalPlayer?.Data?.PlayerName;
         if (string.IsNullOrWhiteSpace(name)) name = "host";
         return Regex.Replace(name, @"[^a-zA-Z0-9_\-]", "_");
+    }
+
+    private static void FloatRow(float y, string label, ConfigEntry<float> cfg, float min, float max, float step)
+    {
+        if (_rowsContainer == null) return;
+        float lx = _panelLeft + 0.12f;
+        float numX = _panelLeft + _panelW - 0.9f;
+        MakeLabel(_rowsContainer.transform, label, new Vector3(lx, y, -100f), 1.05f, Color.white, TextAlignmentOptions.Left, 501);
+
+        float v = cfg.Value;
+        var valObj = MakeLabel(_rowsContainer.transform, v.ToString("F1"), new Vector3(numX, y, -100f),
+            1.15f, Color.white, TextAlignmentOptions.Center, 502);
+        var vt = valObj.GetComponent<TextMeshPro>();
+
+        var minObj = MakeLabel(_rowsContainer.transform, "<", new Vector3(numX - 0.25f, y, -100f),
+            1.3f, Palette.ImpostorRed, TextAlignmentOptions.Center, 502);
+        minObj.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.2f);
+        AddButton(minObj).OnClick.AddListener((Action)(() => { v = Math.Max(min, v - step); cfg.Value = v; if (vt) vt.text = v.ToString("F1"); }));
+
+        var plusObj = MakeLabel(_rowsContainer.transform, ">", new Vector3(numX + 0.25f, y, -100f),
+            1.3f, Color.green, TextAlignmentOptions.Center, 502);
+        plusObj.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.2f);
+        AddButton(plusObj).OnClick.AddListener((Action)(() => { v = Math.Min(max, v + step); cfg.Value = v; if (vt) vt.text = v.ToString("F1"); }));
     }
 
     private static void MakeActionBtn(float y, string label, Action onClick)
