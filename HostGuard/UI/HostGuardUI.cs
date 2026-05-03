@@ -28,9 +28,7 @@ public static class HostGuardUI
 
     // List expand/collapse state
     private static bool _showExactNames = false;
-    private static bool _showContainsNames = false;
     private static bool _showExactWords = false;
-    private static bool _showContainsWords = false;
     private static string? _addingToList = null;
     private static string _addInput = "";
     private static TextMeshPro? _addInputTmp = null;
@@ -366,16 +364,12 @@ public static class HostGuardUI
         Row(y, "Bad Names", HostGuardConfig.BanForBadName, null); y -= rowH;
         y = RenderWordList(y, "Exact Match Names", HostGuardConfig.GetBadNameWordsList(),
             ref _showExactNames, "exactNames", HostGuardConfig.AddBadNameWord, HostGuardConfig.RemoveBadNameWord);
-        y = RenderWordList(y, "Contains Names", HostGuardConfig.GetContainsBannedNames(),
-            ref _showContainsNames, "containsNames", HostGuardConfig.AddContainsBannedName, HostGuardConfig.RemoveContainsBannedName);
 
         // --- CHAT FILTER ---
         HdrToggle(y, "CHAT FILTER", HostGuardConfig.ChatFilterEnabled); y -= 0.3f;
         BanKickRow(y, "Banned Words", HostGuardConfig.BanForBannedWords); y -= rowH;
         y = RenderWordList(y, "Exact Match Words", HostGuardConfig.GetBannedWordsList(),
             ref _showExactWords, "exactWords", HostGuardConfig.AddBannedWord, HostGuardConfig.RemoveBannedWord);
-        y = RenderWordList(y, "Contains Words", HostGuardConfig.GetContainsBannedWords(),
-            ref _showContainsWords, "containsWords", HostGuardConfig.AddContainsBannedWord, HostGuardConfig.RemoveContainsBannedWord);
 
         // --- BOT PROTECTION ---
         HdrToggle(y, "BOT PROTECTION", HostGuardConfig.BotProtectionEnabled); y -= 0.3f;
@@ -617,9 +611,7 @@ public static class HostGuardUI
         AddButton(togObj).OnClick.AddListener((Action)(() =>
         {
             if (capturedId == "exactNames") _showExactNames = !_showExactNames;
-            else if (capturedId == "containsNames") _showContainsNames = !_showContainsNames;
             else if (capturedId == "exactWords") _showExactWords = !_showExactWords;
-            else if (capturedId == "containsWords") _showContainsWords = !_showContainsWords;
             RebuildSettings();
         }));
         y -= 0.24f;
@@ -1068,6 +1060,6 @@ public static class HostGuardUI
         _refreshCbs.Clear(); _camReady = false;
         _renamingPreset = null; _renameInput = ""; _renameInputTmp = null; _renameConfirmAction = null;
         _addingToList = null; _addInput = ""; _addInputTmp = null; _addConfirmAction = null;
-        _showExactNames = false; _showContainsNames = false; _showExactWords = false; _showContainsWords = false;
+        _showExactNames = false; _showExactWords = false;
     }
 }
