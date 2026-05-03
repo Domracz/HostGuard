@@ -30,15 +30,15 @@ public static class HostGuardSettingsPanel
         CreateToggleRow(content.transform, "Ban Default Names", HostGuardConfig.BanForDefaultName, ref y);
         CreateToggleRow(content.transform, "Strict Casing", HostGuardConfig.StrictDefaultNameCasing, ref y);
         CreateToggleRow(content.transform, "Ban Bad Names", HostGuardConfig.BanForBadName, ref y);
-        CreateTextRow(content.transform, "Bad Name Words", HostGuardConfig.BadNameWords, ref y);
+        CreateTextRow(content.transform, "Exact Match Names", HostGuardConfig.BadNameWords, ref y);
 
         // === CHAT FILTER ===
         UIFactory.CreateHeader(content.transform, "CHAT FILTER", new Vector3(0f, y, -2f));
         y -= 0.45f;
         CreateToggleRow(content.transform, "Chat Filter Enabled", HostGuardConfig.ChatFilterEnabled, ref y);
         CreateToggleRow(content.transform, "Ban for Banned Words", HostGuardConfig.BanForBannedWords, ref y);
-        CreateToggleRow(content.transform, "Contains Mode", HostGuardConfig.ContainsMode, ref y);
-        CreateTextRow(content.transform, "Banned Words", HostGuardConfig.BannedWords, ref y);
+        CreateTextRow(content.transform, "Exact Match Words", HostGuardConfig.BannedWords, ref y);
+        CreateTextRow(content.transform, "Contains Words", HostGuardConfig.BannedWordsContains, ref y);
 
         // === BOT PROTECTION ===
         UIFactory.CreateHeader(content.transform, "BOT PROTECTION", new Vector3(0f, y, -2f));
