@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
 using TMPro;
@@ -18,6 +20,7 @@ public static class HostGuardUI
     private static int _gamePresetNum = 1;
     private static bool _settingsTab = true;
     private static bool _gamePresetsMode = false;
+    private static string? _renamingPreset = null;
 
     // Scroll state
     private static float _scrollY = 0f;
@@ -81,13 +84,14 @@ public static class HostGuardUI
 
         if (!_sortingLayerDiscovered && HudManager.Instance != null)
         {
-            foreach (var sr in HudManager.Instance.GetComponentsInChildren<SpriteRenderer>(true))
+            var renderers = HudManager.Instance.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Count; i++)
             {
+                var sr = renderers[i];
                 if (sr.sprite != null && sr.enabled)
                 {
                     _hudSortingLayer = sr.sortingLayerName ?? "";
                     _hudSpriteMaterial = sr.material;
-                    _sortingLayerDiscovered = true;
                     break;
                 }
             }
@@ -146,13 +150,14 @@ public static class HostGuardUI
 
         if (!_sortingLayerDiscovered && HudManager.Instance != null)
         {
-            foreach (var sr in HudManager.Instance.GetComponentsInChildren<SpriteRenderer>(true))
+            var renderers = HudManager.Instance.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Count; i++)
             {
+                var sr = renderers[i];
                 if (sr.sprite != null && sr.enabled)
                 {
                     _hudSortingLayer = sr.sortingLayerName ?? "";
                     _hudSpriteMaterial = sr.material;
-                    _sortingLayerDiscovered = true;
                     break;
                 }
             }
@@ -351,6 +356,37 @@ public static class HostGuardUI
             }
         }
 
+        // Whitelist export/import buttons
+        MakeActionBtn(y, "Export Whitelist", () =>
+        {
+            var codes = HostGuardConfig.GetWhitelistedCodes();
+            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_whitelist_export.txt");
+            File.WriteAllLines(path, codes);
+            System.Diagnostics.Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
+            ChatHelper.SendLocalMessage("[HostGuard] Whitelist exported to hostguard_whitelist_export.txt");
+        }); y -= 0.26f;
+        MakeActionBtn(y, "Import Whitelist", () =>
+        {
+            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_whitelist_import.txt");
+            if (!File.Exists(path))
+            {
+                ChatHelper.SendLocalMessage("[HostGuard] Place hostguard_whitelist_import.txt in the BepInEx config folder, then press Import.");
+                return;
+            }
+            var existing = HostGuardConfig.GetWhitelistedCodes();
+            int added = 0, dupes = 0;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                var code = line.Trim();
+                if (code.Length == 0 || code.Contains(",")) continue;
+                if (existing.Contains(code)) { dupes++; continue; }
+                HostGuardConfig.AddToWhitelist(code);
+                added++;
+            }
+            ChatHelper.SendLocalMessage($"[HostGuard] Whitelist import: {added} codes added, {dupes} duplicates skipped.");
+            RebuildSettings();
+        }); y -= 0.26f;
+
         // --- BLACKLIST ---
         MakeLabel(_rowsContainer.transform, "BLACKLIST", new Vector3(_panelLeft + 0.12f, y, -100f),
             1.2f, HdrColor, TextAlignmentOptions.Left, 501); y -= 0.28f;
@@ -379,6 +415,32 @@ public static class HostGuardUI
                 y -= 0.22f;
             }
         }
+
+        // Blacklist export/import buttons
+        MakeActionBtn(y, "Open Blacklist Folder", () =>
+        {
+            System.Diagnostics.Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
+            ChatHelper.SendLocalMessage("[HostGuard] Blacklist file: hostguard_blacklist.txt");
+        }); y -= 0.26f;
+        MakeActionBtn(y, "Import Blacklist", () =>
+        {
+            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_blacklist_import.txt");
+            if (!File.Exists(path))
+            {
+                ChatHelper.SendLocalMessage("[HostGuard] Place hostguard_blacklist_import.txt in the BepInEx config folder, then press Import.");
+                return;
+            }
+            int added = 0, dupes = 0;
+            foreach (var line in File.ReadAllLines(path))
+            {
+                var code = line.Trim();
+                if (code.Length == 0 || code.Contains(",")) continue;
+                if (Blacklist.Add(code)) added++;
+                else dupes++;
+            }
+            ChatHelper.SendLocalMessage($"[HostGuard] Blacklist import: {added} codes added, {dupes} duplicates skipped.");
+            RebuildSettings();
+        }); y -= 0.26f;
 
         // Calculate scroll range
         _totalContentHeight = _contentTop - y;
@@ -451,6 +513,20 @@ public static class HostGuardUI
             1.3f, Color.green, TextAlignmentOptions.Center, 502);
         plusObj.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.2f);
         AddButton(plusObj).OnClick.AddListener((Action)(() => { v = Math.Min(max, v + step); cfg.Value = v; if (vt) vt.text = v.ToString(); }));
+    }
+
+    private static void MakeActionBtn(float y, string label, Action onClick)
+    {
+        if (_rowsContainer == null) return;
+        var btn = new GameObject("ActBtn");
+        btn.transform.SetParent(_rowsContainer.transform);
+        btn.transform.localPosition = new Vector3(_panelCX, y, -100f);
+        btn.transform.localScale = Vector3.one;
+        float bw = _panelW * 0.7f;
+        MakeBg(btn.transform, Vector3.zero, bw, 0.2f, new Color(0.2f, 0.35f, 0.55f, 1f), 501);
+        MakeLabel(btn.transform, label, Vector3.zero, 1.0f, Color.white, TextAlignmentOptions.Center, 502);
+        btn.AddComponent<BoxCollider2D>().size = new Vector2(bw, 0.2f);
+        AddButton(btn).OnClick.AddListener(onClick);
     }
 
     private static void MakeSmallToggle(Transform parent, ConfigEntry<bool> cfg, Vector3 pos,
