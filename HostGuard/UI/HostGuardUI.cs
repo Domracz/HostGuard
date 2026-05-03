@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using BepInEx.Configuration;
 using TMPro;
 using UnityEngine;
@@ -390,26 +391,25 @@ public static class HostGuardUI
             }
         }
 
-        // Whitelist export/import buttons
+        // Whitelist export/import/folder buttons
         MakeActionBtn(y, "Export Whitelist", () =>
         {
             var codes = HostGuardConfig.GetWhitelistedCodes();
-            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_whitelist_export.txt");
-            File.WriteAllLines(path, codes);
-            System.Diagnostics.Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
-            ChatHelper.SendLocalMessage("[HostGuard] Whitelist exported to hostguard_whitelist_export.txt");
+            var filename = $"whitelist_{SanitizeNickname()}_export.txt";
+            File.WriteAllLines(Path.Combine(BepInEx.Paths.ConfigPath, filename), codes);
+            ChatHelper.SendLocalMessage($"[HostGuard] Whitelist exported to {filename}");
         }); y -= 0.26f;
         MakeActionBtn(y, "Import Whitelist", () =>
         {
-            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_whitelist_import.txt");
-            if (!File.Exists(path))
+            var files = Directory.GetFiles(BepInEx.Paths.ConfigPath, "whitelist_*_import.txt");
+            if (files.Length == 0)
             {
-                ChatHelper.SendLocalMessage("[HostGuard] Place hostguard_whitelist_import.txt in the BepInEx config folder, then press Import.");
+                ChatHelper.SendLocalMessage("[HostGuard] No import file found. Export a list, rename '_export' to '_import', place it in the BepInEx config folder, then press Import.");
                 return;
             }
             var existing = HostGuardConfig.GetWhitelistedCodes();
             int added = 0, dupes = 0;
-            foreach (var line in File.ReadAllLines(path))
+            foreach (var line in File.ReadAllLines(files[0]))
             {
                 var code = line.Trim();
                 if (code.Length == 0 || code.Contains(",")) continue;
@@ -419,6 +419,10 @@ public static class HostGuardUI
             }
             ChatHelper.SendLocalMessage($"[HostGuard] Whitelist import: {added} codes added, {dupes} duplicates skipped.");
             RebuildSettings();
+        }); y -= 0.26f;
+        MakeActionBtn(y, "Open Folder", () =>
+        {
+            Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
         }); y -= 0.26f;
 
         // --- BLACKLIST ---
@@ -450,22 +454,24 @@ public static class HostGuardUI
             }
         }
 
-        // Blacklist export/import buttons
-        MakeActionBtn(y, "Open Blacklist Folder", () =>
+        // Blacklist export/import/folder buttons
+        MakeActionBtn(y, "Export Blacklist", () =>
         {
-            System.Diagnostics.Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
-            ChatHelper.SendLocalMessage("[HostGuard] Blacklist file: hostguard_blacklist.txt");
+            var codes = Blacklist.GetAll();
+            var filename = $"blacklist_{SanitizeNickname()}_export.txt";
+            File.WriteAllLines(Path.Combine(BepInEx.Paths.ConfigPath, filename), codes);
+            ChatHelper.SendLocalMessage($"[HostGuard] Blacklist exported to {filename}");
         }); y -= 0.26f;
         MakeActionBtn(y, "Import Blacklist", () =>
         {
-            var path = Path.Combine(BepInEx.Paths.ConfigPath, "hostguard_blacklist_import.txt");
-            if (!File.Exists(path))
+            var files = Directory.GetFiles(BepInEx.Paths.ConfigPath, "blacklist_*_import.txt");
+            if (files.Length == 0)
             {
-                ChatHelper.SendLocalMessage("[HostGuard] Place hostguard_blacklist_import.txt in the BepInEx config folder, then press Import.");
+                ChatHelper.SendLocalMessage("[HostGuard] No import file found. Export a list, rename '_export' to '_import', place it in the BepInEx config folder, then press Import.");
                 return;
             }
             int added = 0, dupes = 0;
-            foreach (var line in File.ReadAllLines(path))
+            foreach (var line in File.ReadAllLines(files[0]))
             {
                 var code = line.Trim();
                 if (code.Length == 0 || code.Contains(",")) continue;
@@ -474,6 +480,10 @@ public static class HostGuardUI
             }
             ChatHelper.SendLocalMessage($"[HostGuard] Blacklist import: {added} codes added, {dupes} duplicates skipped.");
             RebuildSettings();
+        }); y -= 0.26f;
+        MakeActionBtn(y, "Open Folder", () =>
+        {
+            Process.Start("explorer.exe", BepInEx.Paths.ConfigPath);
         }); y -= 0.26f;
 
         // Calculate scroll range
@@ -547,6 +557,13 @@ public static class HostGuardUI
             1.3f, Color.green, TextAlignmentOptions.Center, 502);
         plusObj.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.2f);
         AddButton(plusObj).OnClick.AddListener((Action)(() => { v = Math.Min(max, v + step); cfg.Value = v; if (vt) vt.text = v.ToString(); }));
+    }
+
+    private static string SanitizeNickname()
+    {
+        var name = PlayerControl.LocalPlayer?.Data?.PlayerName;
+        if (string.IsNullOrWhiteSpace(name)) name = "host";
+        return Regex.Replace(name, @"[^a-zA-Z0-9_\-]", "_");
     }
 
     private static void MakeActionBtn(float y, string label, Action onClick)
