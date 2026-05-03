@@ -321,11 +321,14 @@ public static class HostGuardUI
         Row(y, "Default Names", HostGuardConfig.KickDefaultNames, HostGuardConfig.BanForDefaultName); y -= rowH;
         Row(y, "Strict Casing", HostGuardConfig.StrictDefaultNameCasing, null); y -= rowH;
         Row(y, "Bad Names", HostGuardConfig.BanForBadName, null); y -= rowH;
+        TxtRow(y, "Exact Match Names (comma-separated)", HostGuardConfig.BadNameWords); y -= rowH;
+        TxtRow(y, "Contains Match Names (comma-separated)", HostGuardConfig.BannedNamesContains); y -= rowH;
 
         // --- CHAT FILTER ---
         HdrToggle(y, "CHAT FILTER", HostGuardConfig.ChatFilterEnabled); y -= 0.3f;
-        Row(y, "Contains Mode", HostGuardConfig.ContainsMode, null); y -= rowH;
         BanKickRow(y, "Banned Words", HostGuardConfig.BanForBannedWords); y -= rowH;
+        TxtRow(y, "Exact Match List (comma-separated)", HostGuardConfig.BannedWords); y -= rowH;
+        TxtRow(y, "Contains List (comma-separated)", HostGuardConfig.BannedWordsContains); y -= rowH;
 
         // --- BOT PROTECTION ---
         HdrToggle(y, "BOT PROTECTION", HostGuardConfig.BotProtectionEnabled); y -= 0.3f;

@@ -77,10 +77,7 @@ public static class CommandPatch
             SetBool(HostGuardConfig.BanForBannedWords, true, "Banned words in chat will now result in a BAN.");
         else if (lower == "!badchat off" || lower == "!bc off")
             SetBool(HostGuardConfig.BanForBannedWords, false, "Banned words in chat will now result in a kick.");
-        else if (lower == "!contains on" || lower == "!cm on")
-            SetBool(HostGuardConfig.ContainsMode, true, "Contains mode ON: messages containing a banned word will trigger.");
-        else if (lower == "!contains off" || lower == "!cm off")
-            SetBool(HostGuardConfig.ContainsMode, false, "Contains mode OFF: only exact matches will trigger.");
+        // !contains / !cm commands removed - use two separate lists instead
         // Bot protection toggles
         else if (lower == "!botnames on" || lower == "!bot on")
             SetBool(HostGuardConfig.BanKnownBots, true, "Known bots will now be BANNED.");
@@ -464,7 +461,7 @@ public static class CommandPatch
             $"Default name filter: {(HostGuardConfig.KickDefaultNames.Value ? "ON" : "OFF")} ({(HostGuardConfig.BanForDefaultName.Value ? "ban" : "kick")})\n" +
             $"Bad name filter: {(HostGuardConfig.GetBadNameWordsList().Count > 0 ? "ON" : "OFF")} ({(HostGuardConfig.BanForBadName.Value ? "ban" : "kick")})\n" +
             $"Chat filter: {(HostGuardConfig.GetBannedWordsList().Count > 0 ? "ON" : "OFF")} ({(HostGuardConfig.BanForBannedWords.Value ? "ban" : "kick")})\n" +
-            $"Contains mode: {(HostGuardConfig.ContainsMode.Value ? "ON" : "OFF")}\n" +
+            $"Chat exact words: [{HostGuardConfig.BannedWords.Value}]\n" +
             $"Bot protection: ON ({(HostGuardConfig.BanKnownBots.Value ? "ban" : "kick")})\n" +
             $"Flood protection: {(HostGuardConfig.FloodProtectionEnabled.Value ? "ON" : "OFF")}\n" +
             $"Anti-cheat: {(HostGuardConfig.AntiCheatEnabled.Value ? "ON" : "OFF")} ({(HostGuardConfig.BanOnInvalidRpc.Value ? "ban" : "kick")})\n" +
