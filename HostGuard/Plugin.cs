@@ -5,7 +5,7 @@ using HarmonyLib;
 using Reactor;
 using Reactor.Networking.Attributes;
 
-[BepInPlugin("com.rareshonour.hostguard", "HostGuard", "3.0.0")]
+[BepInPlugin("com.rareshonour.hostguard", "HostGuard", "3.2.0")]
 [BepInDependency(ReactorPlugin.Id)]
 [ReactorModFlags(Reactor.Networking.ModFlags.None)]
 public class HostGuardPlugin : BasePlugin
