@@ -89,6 +89,12 @@ public static class HostGuardSettingsPanel
         CreateTextRow(content.transform, "Rules Message", HostGuardConfig.RulesMessage, ref y);
         CreateTextRow(content.transform, "Ban List URL", HostGuardConfig.BanListUrl, ref y);
 
+        // === LOBBY ===
+        UIFactory.CreateHeader(content.transform, "LOBBY", new Vector3(0f, y, -2f));
+        y -= 0.45f;
+        CreateToggleRow(content.transform, "Auto-Return to Lobby", HostGuardConfig.AutoReturnToLobby, ref y);
+        CreateFloatRow(content.transform, "Auto-Return Delay (sec)", HostGuardConfig.AutoReturnDelay, 0f, 30f, 0.5f, ref y);
+
         // === WHITELIST / BLACKLIST ===
         UIFactory.CreateHeader(content.transform, "WHITELIST / BLACKLIST", new Vector3(0f, y, -2f));
         y -= 0.45f;
@@ -132,6 +138,15 @@ public static class HostGuardSettingsPanel
         int min, int max, int step, ref float y)
     {
         UIFactory.CreateNumberStepper(parent, label, label, config.Value, min, max, step,
+            newVal => { config.Value = newVal; },
+            new Vector3(0f, y, -2f));
+        y -= 0.5f;
+    }
+
+    private static void CreateFloatRow(Transform parent, string label, ConfigEntry<float> config,
+        float min, float max, float step, ref float y)
+    {
+        UIFactory.CreateFloatStepper(parent, label, label, config.Value, min, max, step,
             newVal => { config.Value = newVal; },
             new Vector3(0f, y, -2f));
         y -= 0.5f;

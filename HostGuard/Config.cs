@@ -73,6 +73,10 @@ public static class HostGuardConfig
     public static ConfigEntry<int> MinLevel = null!;
     public static ConfigEntry<bool> BanForLowLevel = null!;
 
+    // Lobby
+    public static ConfigEntry<bool> AutoReturnToLobby = null!;
+    public static ConfigEntry<float> AutoReturnDelay = null!;
+
     private static string _bannedWordsRaw = "";
     private static List<string> _bannedWordsCache = new();
     private static string _badNameWordsRaw = "";
@@ -276,6 +280,16 @@ public static class HostGuardConfig
             "If true, low-level players get banned. If false, just kicked."
         );
 
+        // Lobby
+        AutoReturnToLobby = config.Bind(
+            "Lobby", "AutoReturnToLobby", false,
+            "If true, the host automatically clicks through post-game screens to return to the lobby."
+        );
+        AutoReturnDelay = config.Bind(
+            "Lobby", "AutoReturnDelay", 3.0f,
+            "Seconds to wait after game ends before auto-clicking to return to lobby."
+        );
+
     }
 
     public static List<string> GetBannedWordsList()
@@ -435,6 +449,10 @@ public static class HostGuardConfig
             ("Anti-Cheat", "Ban on Invalid RPC", BanOnInvalidRpc, typeof(bool)),
             ("Anti-Cheat", "Chat Rate Limit", ChatRateLimit, typeof(int)),
             ("Anti-Cheat", "Rate Limit Window (sec)", ChatRateLimitWindowSeconds, typeof(int)),
+
+            // Lobby
+            ("Lobby", "Auto-Return to Lobby", AutoReturnToLobby, typeof(bool)),
+            ("Lobby", "Auto-Return Delay (sec)", AutoReturnDelay, typeof(float)),
 
             // General
             ("General", "Auto-Start", AutoStartEnabled, typeof(bool)),
