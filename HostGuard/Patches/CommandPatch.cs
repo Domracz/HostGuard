@@ -29,8 +29,6 @@ public static class CommandPatch
             HandleInfo(args);
         else if (TryGetArgs(lower, msg, "!setrules", "!sr", out args))
             SetRules(args);
-        else if (TryGetArgs(lower, msg, "!autostart", "!as", out args))
-            HandleAutoStart(args);
         else if (TryGetArgs(lower, msg, "!addword", "!aw", out args))
             HandleAddWord(args);
         else if (TryGetArgs(lower, msg, "!removeword", "!rw", out args))
@@ -60,57 +58,11 @@ public static class CommandPatch
             ShowWords();
         else if (Cmd(lower, "!namelist", "!nl"))
             ShowNameList();
-        // Toggle commands
-        else if (lower == "!defaultnames on" || lower == "!dn on")
-            SetBool(HostGuardConfig.KickDefaultNames, true, "Default name filter enabled.");
-        else if (lower == "!defaultnames off" || lower == "!dn off")
-            SetBool(HostGuardConfig.KickDefaultNames, false, "Default name filter disabled.");
-        else if (lower == "!defaultnames ban" || lower == "!dn ban")
-            SetBool(HostGuardConfig.BanForDefaultName, true, "Default names will now be BANNED.");
-        else if (lower == "!defaultnames kick" || lower == "!dn kick")
-            SetBool(HostGuardConfig.BanForDefaultName, false, "Default names will now be kicked (not banned).");
-        else if (lower == "!badnames on" || lower == "!bn on")
-            SetBool(HostGuardConfig.BanForBadName, true, "Bad names will now be BANNED.");
-        else if (lower == "!badnames off" || lower == "!bn off")
-            SetBool(HostGuardConfig.BanForBadName, false, "Bad names will now be kicked (not banned).");
-        else if (lower == "!badchat on" || lower == "!bc on")
-            SetBool(HostGuardConfig.BanForBannedWords, true, "Banned words in chat will now result in a BAN.");
-        else if (lower == "!badchat off" || lower == "!bc off")
-            SetBool(HostGuardConfig.BanForBannedWords, false, "Banned words in chat will now result in a kick.");
-        else if (lower == "!contains on" || lower == "!cm on")
-            SetBool(HostGuardConfig.ContainsMode, true, "Contains mode ON: messages containing a banned word will trigger.");
-        else if (lower == "!contains off" || lower == "!cm off")
-            SetBool(HostGuardConfig.ContainsMode, false, "Contains mode OFF: only exact matches will trigger.");
-        // Bot protection toggles
-        else if (lower == "!botnames on" || lower == "!bot on")
-            SetBool(HostGuardConfig.BanKnownBots, true, "Known bots will now be BANNED.");
-        else if (lower == "!botnames off" || lower == "!bot off")
-            SetBool(HostGuardConfig.BanKnownBots, false, "Known bots will now be kicked (not banned).");
-        // Flood protection toggles
-        else if (lower == "!flood on" || lower == "!fp on")
-            SetBool(HostGuardConfig.FloodProtectionEnabled, true, "Flood protection enabled.");
-        else if (lower == "!flood off" || lower == "!fp off")
-            SetBool(HostGuardConfig.FloodProtectionEnabled, false, "Flood protection disabled.");
-        // Anti-cheat toggles
-        else if (lower == "!anticheat on" || lower == "!ac on")
-            SetBool(HostGuardConfig.AntiCheatEnabled, true, "Anti-cheat enabled.");
-        else if (lower == "!anticheat off" || lower == "!ac off")
-            SetBool(HostGuardConfig.AntiCheatEnabled, false, "Anti-cheat disabled.");
-        else if (lower == "!anticheat ban" || lower == "!ac ban")
-            SetBool(HostGuardConfig.BanOnInvalidRpc, true, "Cheaters will now be BANNED.");
-        else if (lower == "!anticheat kick" || lower == "!ac kick")
-            SetBool(HostGuardConfig.BanOnInvalidRpc, false, "Cheaters will now be kicked (not banned).");
-        // Cosmetic detection toggles
-        else if (lower == "!cosmetic on" || lower == "!cos on")
-            SetBool(HostGuardConfig.CosmeticDetectionEnabled, true, "Cosmetic bot detection enabled.");
-        else if (lower == "!cosmetic off" || lower == "!cos off")
-            SetBool(HostGuardConfig.CosmeticDetectionEnabled, false, "Cosmetic bot detection disabled.");
-        // Auto-lock toggles
+        // Toggle commands (no panel equivalent)
         else if (lower == "!autolock on" || lower == "!al on")
             SetBool(HostGuardConfig.AutoLockOnFlood, true, "Auto-lock on flood enabled.");
         else if (lower == "!autolock off" || lower == "!al off")
             SetBool(HostGuardConfig.AutoLockOnFlood, false, "Auto-lock on flood disabled.");
-        // Join notifications toggles
         else if (lower == "!notify on" || lower == "!n on")
             SetBool(HostGuardConfig.VerboseJoinNotifications, true, "Verbose join notifications enabled.");
         else if (lower == "!notify off" || lower == "!n off")
@@ -370,34 +322,6 @@ public static class CommandPatch
         ChatHelper.SendLocalMessage($"Rules updated: {newRules}");
     }
 
-    // --- AutoStart ---
-
-    static void HandleAutoStart(string args)
-    {
-        string lower = args.ToLower();
-        if (lower == "on")
-        {
-            SetBool(HostGuardConfig.AutoStartEnabled, true, "Auto-start enabled.");
-            return;
-        }
-        if (lower == "off")
-        {
-            SetBool(HostGuardConfig.AutoStartEnabled, false, "Auto-start disabled.");
-            return;
-        }
-
-        if (int.TryParse(args, out int count) && count > 0)
-        {
-            HostGuardConfig.AutoStartPlayerCount.Value = count;
-            HostGuardConfig.AutoStartEnabled.Value = true;
-            ChatHelper.SendLocalMessage($"Auto-start enabled at {count} players.");
-        }
-        else
-        {
-            ChatHelper.SendLocalMessage("Usage: !autostart on/off or !autostart <number>");
-        }
-    }
-
     // --- Word management ---
 
     static void HandleAddWord(string word)
@@ -491,15 +415,6 @@ public static class CommandPatch
             "!status/!s - Show settings\n" +
             "!rules/!r - Show rules\n" +
             "!setrules/!sr <msg> - Set rules\n" +
-            "!autostart/!as on/off/<n> - Auto-start\n" +
-            "!defaultnames/!dn on/off/ban/kick\n" +
-            "!badnames/!bn on/off\n" +
-            "!badchat/!bc on/off\n" +
-            "!contains/!cm on/off\n" +
-            "!botnames/!bot on/off - Bot ban/kick\n" +
-            "!flood/!fp on/off - Flood protection\n" +
-            "!anticheat/!ac on/off/ban/kick\n" +
-            "!cosmetic/!cos on/off - Cosmetic detect\n" +
             "!lock/!lk - Lock lobby (private)\n" +
             "!unlock/!ulk - Unlock lobby (public)\n" +
             "!autolock/!al on/off - Auto-lock floods\n" +
