@@ -3,15 +3,25 @@ using BepInEx.Unity.IL2CPP.Utils;
 using HarmonyLib;
 using UnityEngine;
 
-[HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.Start))]
+[HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.ShowButtons))]
 public static class GameEndPatch
 {
     public static void Postfix(EndGameManager __instance)
     {
-        if (!HostGuardConfig.AutoReturnToLobby.Value) return;
-        if (!AmongUsClient.Instance.AmHost) return;
+        HostGuardPlugin.Logger.LogInfo("[AutoReturn] Patch fired on ShowButtons");
 
-        HostGuardPlugin.Logger.LogInfo("[AutoReturn] Game ended, scheduling return to lobby...");
+        if (!HostGuardConfig.AutoReturnToLobby.Value)
+        {
+            HostGuardPlugin.Logger.LogInfo("[AutoReturn] Disabled in config, skipping.");
+            return;
+        }
+        if (!AmongUsClient.Instance.AmHost)
+        {
+            HostGuardPlugin.Logger.LogInfo("[AutoReturn] Not host, skipping.");
+            return;
+        }
+
+        HostGuardPlugin.Logger.LogInfo($"[AutoReturn] Scheduling return in {HostGuardConfig.AutoReturnDelay.Value}s...");
         __instance.StartCoroutine(AutoReturnCoroutine(__instance));
     }
 
@@ -31,17 +41,30 @@ public static class GameEndPatch
             yield break;
         }
 
-        // Click continue (advances past role/results screen)
+        // Click continue (advances past role/XP screen)
         if (navigation.ContinueButton != null)
         {
+            HostGuardPlugin.Logger.LogInfo("[AutoReturn] Clicking ContinueButton...");
             var passive = navigation.ContinueButton.GetComponent<PassiveButton>();
             if (passive != null)
-                passive.OnClick.Invoke();
+            {
+                passive.ReceiveClickDown();
+                passive.ReceiveClickUp();
+            }
+            else
+            {
+                HostGuardPlugin.Logger.LogWarning("[AutoReturn] ContinueButton has no PassiveButton component.");
+            }
+        }
+        else
+        {
+            HostGuardPlugin.Logger.LogInfo("[AutoReturn] No ContinueButton, skipping to NextGame.");
         }
 
         yield return new WaitForSeconds(1f);
 
         // Click play again (returns to lobby)
+        HostGuardPlugin.Logger.LogInfo("[AutoReturn] Calling NextGame()...");
         navigation.NextGame();
 
         ChatHelper.SendLocalMessage("[HostGuard] Returning to lobby...");
