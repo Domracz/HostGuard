@@ -97,6 +97,7 @@ public static class FloodGuard
                 _leaveLockoutUntil = now.AddSeconds(10);
                 HostGuardPlugin.Logger.LogWarning($"[FloodGuard] Rapid join-leave detected! {_rapidLeaves.Count} in 10s. Blocking new joins for 10s.");
                 ChatHelper.SendLocalMessage($"[Flood] Rapid join-leave attack detected. Blocking new joins for 10s.");
+                NotificationManager.Show("Flood: rapid join-leave detected");
                 _rapidLeaves.Clear();
                 LobbyLock.AutoLock();
             }

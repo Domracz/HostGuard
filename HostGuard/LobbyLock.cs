@@ -48,6 +48,7 @@ public static class LobbyLock
         SetLobbyPrivate(true);
         string durationMsg = duration > 0 ? $" Auto-unlock in {duration}s." : " Use !unlock to reopen.";
         ChatHelper.SendLocalMessage($"[Flood] Lobby auto-locked!{durationMsg}");
+        NotificationManager.Show("Lobby auto-locked (flood)");
         HostGuardPlugin.Logger.LogWarning($"[HostGuard] Lobby auto-locked for {(duration > 0 ? $"{duration}s" : "indefinitely")}.");
     }
 
@@ -61,6 +62,7 @@ public static class LobbyLock
             _autoUnlockAt = DateTime.MinValue;
             SetLobbyPrivate(false);
             ChatHelper.SendLocalMessage("[Flood] Lobby auto-unlocked.");
+            NotificationManager.Show("Lobby auto-unlocked");
             HostGuardPlugin.Logger.LogInfo("[HostGuard] Lobby auto-unlocked after cooldown.");
         }
     }

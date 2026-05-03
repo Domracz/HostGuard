@@ -163,12 +163,14 @@ public static class CommandPatch
     {
         LobbyLock.Lock();
         ChatHelper.SendLocalMessage("Lobby locked (set to private).");
+        NotificationManager.Show("Lobby locked");
     }
 
     static void HandleUnlock()
     {
         LobbyLock.Unlock();
         ChatHelper.SendLocalMessage("Lobby unlocked (set to public).");
+        NotificationManager.Show("Lobby unlocked");
     }
 
     // --- Manual kick/ban ---
@@ -197,6 +199,7 @@ public static class CommandPatch
         string action = ban ? "Banned" : "Kicked";
         AmongUsClient.Instance.KickPlayer(client.Id, ban);
         ChatHelper.SendLocalMessage($"{action} {target.Data.PlayerName} ({target.Data.FriendCode}).");
+        NotificationManager.Show($"{target.Data.PlayerName} was {(ban ? "banned" : "kicked")} (manual)");
     }
 
     static void HandleKickAll()
@@ -222,6 +225,7 @@ public static class CommandPatch
             }
         }
         ChatHelper.SendLocalMessage($"Kicked {count} player(s).");
+        NotificationManager.Show($"Kicked {count} player(s)");
     }
 
     // --- Whitelist ---
@@ -252,7 +256,10 @@ public static class CommandPatch
         if (IsFriendCode(identifier))
         {
             if (HostGuardConfig.RemoveFromWhitelist(identifier))
+            {
                 ChatHelper.SendLocalMessage($"Removed {identifier} from whitelist.");
+                NotificationManager.Show($"{identifier} removed from whitelist");
+            }
             else
                 ChatHelper.SendLocalMessage($"{identifier} is not whitelisted.");
             return;
@@ -265,7 +272,10 @@ public static class CommandPatch
             return;
         }
         if (HostGuardConfig.RemoveFromWhitelist(target.Data.FriendCode))
+        {
             ChatHelper.SendLocalMessage($"Removed {target.Data.PlayerName} ({target.Data.FriendCode}) from whitelist.");
+            NotificationManager.Show($"{target.Data.PlayerName} removed from whitelist");
+        }
         else
             ChatHelper.SendLocalMessage($"{target.Data.PlayerName} is not whitelisted.");
     }
@@ -288,7 +298,10 @@ public static class CommandPatch
         if (IsFriendCode(identifier))
         {
             if (Blacklist.Add(identifier))
+            {
                 ChatHelper.SendLocalMessage($"Added {identifier} to blacklist.");
+                NotificationManager.Show($"{identifier} added to blacklist");
+            }
             else
                 ChatHelper.SendLocalMessage($"{identifier} is already blacklisted.");
             return;
@@ -301,7 +314,10 @@ public static class CommandPatch
             return;
         }
         if (Blacklist.Add(target.Data.FriendCode))
+        {
             ChatHelper.SendLocalMessage($"Added {target.Data.PlayerName} ({target.Data.FriendCode}) to blacklist.");
+            NotificationManager.Show($"{target.Data.PlayerName} added to blacklist");
+        }
         else
             ChatHelper.SendLocalMessage($"{target.Data.PlayerName} is already blacklisted.");
     }
@@ -311,7 +327,10 @@ public static class CommandPatch
         if (IsFriendCode(identifier))
         {
             if (Blacklist.Remove(identifier))
+            {
                 ChatHelper.SendLocalMessage($"Removed {identifier} from blacklist.");
+                NotificationManager.Show($"{identifier} removed from blacklist");
+            }
             else
                 ChatHelper.SendLocalMessage($"{identifier} is not blacklisted.");
             return;
@@ -324,7 +343,10 @@ public static class CommandPatch
             return;
         }
         if (Blacklist.Remove(target.Data.FriendCode))
+        {
             ChatHelper.SendLocalMessage($"Removed {target.Data.PlayerName} ({target.Data.FriendCode}) from blacklist.");
+            NotificationManager.Show($"{target.Data.PlayerName} removed from blacklist");
+        }
         else
             ChatHelper.SendLocalMessage($"{target.Data.PlayerName} is not blacklisted.");
     }

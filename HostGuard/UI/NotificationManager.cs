@@ -12,7 +12,7 @@ public static class NotificationManager
 
     private static readonly List<Toast> _toasts = new();
     private const int MaxToasts = 4;
-    private const float ToastDuration = 4f;
+    private const float ToastDuration = 6f;
     private const float ToastHeight = 0.28f;
     private const float ToastPadding = 0.04f;
 
@@ -26,7 +26,8 @@ public static class NotificationManager
             DismissOldest();
 
         var obj = CreateToast(message);
-        _toasts.Add(new Toast { Obj = obj, ExpireTime = Time.time + ToastDuration });
+        // Newest toast goes to top (index 0)
+        _toasts.Insert(0, new Toast { Obj = obj, ExpireTime = Time.time + ToastDuration });
         RepositionAll();
     }
 
@@ -116,8 +117,9 @@ public static class NotificationManager
     private static void DismissOldest()
     {
         if (_toasts.Count == 0) return;
-        var oldest = _toasts[0];
-        _toasts.RemoveAt(0);
+        int last = _toasts.Count - 1;
+        var oldest = _toasts[last];
+        _toasts.RemoveAt(last);
         if (oldest.Obj != null) Object.Destroy(oldest.Obj);
     }
 
