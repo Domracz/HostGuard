@@ -31,6 +31,10 @@ public static class HostGuardUI
     private static bool _showContainsNames = false;
     private static bool _showExactWords = false;
     private static bool _showContainsWords = false;
+    private static string? _addingToList = null;
+    private static string _addInput = "";
+    private static TextMeshPro? _addInputTmp = null;
+    private static Action? _addConfirmAction = null;
 
     // Scroll state
     private static float _scrollY = 0f;
@@ -163,6 +167,39 @@ public static class HostGuardUI
                 }
             }
             _renameInputTmp.text = "New name: " + _renameInput + "_";
+        }
+
+        // List add keyboard input
+        if (_addingToList != null && _addInputTmp != null)
+        {
+            string typed2 = Input.inputString;
+            for (int ci2 = 0; ci2 < typed2.Length; ci2++)
+            {
+                char ch = typed2[ci2];
+                if (ch == '\b')
+                {
+                    if (_addInput.Length > 0)
+                        _addInput = _addInput.Substring(0, _addInput.Length - 1);
+                }
+                else if (ch == '\r' || ch == '\n')
+                {
+                    _addConfirmAction?.Invoke();
+                    return;
+                }
+                else if (ch == 27)
+                {
+                    _addingToList = null;
+                    _addInputTmp = null;
+                    _addConfirmAction = null;
+                    RebuildSettings();
+                    return;
+                }
+                else if (!char.IsControl(ch))
+                {
+                    _addInput += ch;
+                }
+            }
+            _addInputTmp.text = "Add: " + _addInput + "_";
         }
     }
 
@@ -395,6 +432,9 @@ public static class HostGuardUI
             1.2f, HdrColor, TextAlignmentOptions.Left, 501); y -= 0.3f;
         Row(y, "Auto Return", HostGuardConfig.AutoReturnToLobby, null); y -= rowH;
         FloatRow(y, "Return Delay", HostGuardConfig.AutoReturnDelay, 0f, 30f, 0.5f); y -= rowH;
+        Row(y, "Auto Start If Closing", HostGuardConfig.AutoStartIfClosing, null); y -= rowH;
+        NumRow(y, "Auto Start Threshold (s)", HostGuardConfig.AutoStartThreshold, 5, 120, 5); y -= rowH;
+        NumRow(y, "Min Players", HostGuardConfig.MinPlayersToAutoStart, 1, 15, 1); y -= rowH;
 
         // --- WHITELIST ---
         MakeLabel(_rowsContainer.transform, "WHITELIST", new Vector3(_panelLeft + 0.12f, y, -100f),
@@ -579,6 +619,7 @@ public static class HostGuardUI
         MakeLabel(_rowsContainer.transform, $"{title} ({items.Count})", new Vector3(lx, y, -100f),
             1.05f, Color.white, TextAlignmentOptions.Left, 501);
 
+
         string capturedId = listId;
         var togObj = MakeLabel(_rowsContainer.transform, showState ? "[Hide]" : "[Show]",
             new Vector3(_panelLeft + _panelW - 0.5f, y, -100f), 0.95f,
@@ -595,6 +636,7 @@ public static class HostGuardUI
         y -= 0.24f;
 
         if (!showState) return y;
+
 
         if (items.Count == 0)
         {
@@ -620,40 +662,41 @@ public static class HostGuardUI
             }
         }
 
-        // Add button - reuses the rename input mechanism
-        if (_renamingPreset == capturedId)
+        // Add input or [+ Add] button
+        if (_addingToList == capturedId)
         {
-            _renameInput = "";
-            var inputLabel = MakeLabel(_rowsContainer.transform, "New name: _",
+            var inputLabel = MakeLabel(_rowsContainer.transform, "Add: _",
                 new Vector3(lx + 0.1f, y, -100f), 0.9f, Color.yellow, TextAlignmentOptions.Left, 501);
-            _renameInputTmp = inputLabel.GetComponent<TextMeshPro>();
+            _addInputTmp = inputLabel.GetComponent<TextMeshPro>();
 
             Func<string, bool> addFn = addFunc;
-            _renameConfirmAction = () =>
+            _addConfirmAction = () =>
             {
-                if (!string.IsNullOrWhiteSpace(_renameInput))
-                    addFn(_renameInput.Trim());
-                _renamingPreset = null;
-                _renameInputTmp = null;
-                _renameConfirmAction = null;
+                if (!string.IsNullOrWhiteSpace(_addInput))
+                    addFn(_addInput.Trim());
+                _addingToList = null;
+                _addInputTmp = null;
+                _addConfirmAction = null;
+                _addInput = "";
                 RebuildSettings();
             };
 
-            var okObj = MakeLabel(_rowsContainer.transform, "OK",
+            var okObj = MakeLabel(_rowsContainer.transform, "[OK]",
                 new Vector3(_panelLeft + _panelW - 0.5f, y, -100f), 0.9f,
                 Color.green, TextAlignmentOptions.Center, 501);
-            okObj.AddComponent<BoxCollider2D>().size = new Vector2(0.3f, 0.18f);
-            AddButton(okObj).OnClick.AddListener((Action)(() => _renameConfirmAction?.Invoke()));
+            okObj.AddComponent<BoxCollider2D>().size = new Vector2(0.35f, 0.18f);
+            AddButton(okObj).OnClick.AddListener((Action)(() => _addConfirmAction?.Invoke()));
 
-            var cancelObj = MakeLabel(_rowsContainer.transform, "X",
+            var cancelObj = MakeLabel(_rowsContainer.transform, "[X]",
                 new Vector3(_panelLeft + _panelW - 0.2f, y, -100f), 0.9f,
                 Palette.ImpostorRed, TextAlignmentOptions.Center, 501);
-            cancelObj.AddComponent<BoxCollider2D>().size = new Vector2(0.2f, 0.18f);
+            cancelObj.AddComponent<BoxCollider2D>().size = new Vector2(0.25f, 0.18f);
             AddButton(cancelObj).OnClick.AddListener((Action)(() =>
             {
-                _renamingPreset = null;
-                _renameInputTmp = null;
-                _renameConfirmAction = null;
+                _addingToList = null;
+                _addInputTmp = null;
+                _addConfirmAction = null;
+                _addInput = "";
                 RebuildSettings();
             }));
             y -= 0.22f;
@@ -664,7 +707,12 @@ public static class HostGuardUI
             var addObj = MakeLabel(_rowsContainer.transform, "[+ Add]",
                 new Vector3(lx + 0.1f, y, -100f), 0.9f, Color.green, TextAlignmentOptions.Left, 501);
             addObj.AddComponent<BoxCollider2D>().size = new Vector2(0.5f, 0.18f);
-            AddButton(addObj).OnClick.AddListener((Action)(() => { _renamingPreset = addId; RebuildSettings(); }));
+            AddButton(addObj).OnClick.AddListener((Action)(() =>
+            {
+                _addingToList = addId;
+                _addInput = "";
+                RebuildSettings();
+            }));
             y -= 0.22f;
         }
 
@@ -1024,6 +1072,7 @@ public static class HostGuardUI
         _panel = null; _lobbyButton = null; _rowsContainer = null; _presetsContainer = null;
         _refreshCbs.Clear(); _camReady = false;
         _renamingPreset = null; _renameInput = ""; _renameInputTmp = null; _renameConfirmAction = null;
+        _addingToList = null; _addInput = ""; _addInputTmp = null; _addConfirmAction = null;
         _showExactNames = false; _showContainsNames = false; _showExactWords = false; _showContainsWords = false;
     }
 }
