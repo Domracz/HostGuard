@@ -46,6 +46,13 @@ public static class ChatPatch
         bool ban = HostGuardConfig.BanForBannedWords.Value;
         HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banned" : "Kicked")} {sourcePlayer.Data.PlayerName} ({friendCode}) for: '{chatText}'");
 
+        if (HostGuardConfig.AutoBlacklistBannedWord.Value
+            && !string.IsNullOrEmpty(friendCode) && friendCode.Contains('#'))
+        {
+            Blacklist.Add(friendCode);
+            HostGuardPlugin.Logger.LogInfo($"[Blacklist] Auto-added {friendCode} ({sourcePlayer.Data.PlayerName}) — reason: banned word");
+        }
+
         var client = AmongUsClient.Instance.GetClient(sourcePlayer.OwnerId);
         if (client != null)
         {

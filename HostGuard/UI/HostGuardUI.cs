@@ -328,20 +328,24 @@ public static class HostGuardUI
         // --- NAME FILTER ---
         HdrToggle(y, "NAME FILTER", HostGuardConfig.NameFilterEnabled); y -= 0.3f;
         Row(y, "Default Names", HostGuardConfig.KickDefaultNames, HostGuardConfig.BanForDefaultName); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistDefaultName, null); y -= rowH;
         Row(y, "Strict Casing", HostGuardConfig.StrictDefaultNameCasing, null); y -= rowH;
         Row(y, "Bad Names", HostGuardConfig.BanForBadName, null); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistBadName, null); y -= rowH;
         y = RenderWordList(y, "Exact Match Names", HostGuardConfig.GetBadNameWordsList(), ref _showExactNames, "exactNames", HostGuardConfig.AddBadNameWord, HostGuardConfig.RemoveBadNameWord);
         y = RenderWordList(y, "Contains Names", HostGuardConfig.GetContainsBannedNames(), ref _showContainsNames, "containsNames", HostGuardConfig.AddContainsBannedName, HostGuardConfig.RemoveContainsBannedName);
 
         // --- CHAT FILTER ---
         HdrToggle(y, "CHAT FILTER", HostGuardConfig.ChatFilterEnabled); y -= 0.3f;
         BanKickRow(y, "Banned Words", HostGuardConfig.BanForBannedWords); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistBannedWord, null); y -= rowH;
         y = RenderWordList(y, "Exact Match Words", HostGuardConfig.GetBannedWordsList(), ref _showExactWords, "exactWords", HostGuardConfig.AddBannedWord, HostGuardConfig.RemoveBannedWord);
         y = RenderWordList(y, "Contains Words", HostGuardConfig.GetContainsBannedWords(), ref _showContainsWords, "containsWords", HostGuardConfig.AddContainsBannedWord, HostGuardConfig.RemoveContainsBannedWord);
 
         // --- BOT PROTECTION ---
         HdrToggle(y, "BOT PROTECTION", HostGuardConfig.BotProtectionEnabled); y -= 0.3f;
         Row(y, "Known Bots Ban", HostGuardConfig.BanKnownBots, null); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistKnownBot, null); y -= rowH;
         Row(y, "Cosmetic Detect", HostGuardConfig.CosmeticDetectionEnabled, HostGuardConfig.BanForSuspiciousCosmetics); y -= rowH;
         TxtRow(y, "Bot Names (comma-separated)", HostGuardConfig.KnownBotNames); y -= rowH;
         TxtRow(y, "Bot URLs (comma-separated)", HostGuardConfig.KnownBotUrls); y -= rowH;
@@ -360,6 +364,7 @@ public static class HostGuardUI
         // --- ANTI-CHEAT ---
         HdrToggle(y, "ANTI-CHEAT", HostGuardConfig.AntiCheatEnabled); y -= 0.3f;
         BanKickRow(y, "Invalid RPC", HostGuardConfig.BanOnInvalidRpc); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistInvalidRpc, null); y -= rowH;
         NumRow(y, "Chat Limit", HostGuardConfig.ChatRateLimit, 1, 20, 1); y -= rowH;
         NumRow(y, "Limit Window", HostGuardConfig.ChatRateLimitWindowSeconds, 1, 30, 1); y -= rowH;
 
@@ -367,6 +372,7 @@ public static class HostGuardUI
         HdrToggle(y, "MIN LEVEL", HostGuardConfig.MinLevelEnabled); y -= 0.3f;
         NumRow(y, "Min Level", HostGuardConfig.MinLevel, 0, 100, 1); y -= rowH;
         BanKickRow(y, "Low Level", HostGuardConfig.BanForLowLevel); y -= rowH;
+        Row(y, "  Auto-Blacklist", HostGuardConfig.AutoBlacklistLowLevel, null); y -= rowH;
 
         // --- GENERAL ---
         MakeLabel(_rowsContainer.transform, "GENERAL", new Vector3(_panelLeft + 0.12f, y, -100f),

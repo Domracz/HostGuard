@@ -150,8 +150,16 @@ public static class RpcValidationPatch
     private static void HandleViolation(PlayerControl player, RpcCalls rpc, string reason)
     {
         string playerName = player.Data?.PlayerName ?? "unknown";
+        string friendCode = player.Data?.FriendCode ?? "";
         HostGuardPlugin.Logger.LogWarning($"[AntiCheat] Blocked {rpc} from {playerName}: {reason}");
         ChatHelper.SendLocalMessage($"[AntiCheat] {playerName}: {reason}");
+
+        if (HostGuardConfig.AutoBlacklistInvalidRpc.Value
+            && !string.IsNullOrEmpty(friendCode) && friendCode.Contains('#'))
+        {
+            Blacklist.Add(friendCode);
+            HostGuardPlugin.Logger.LogInfo($"[Blacklist] Auto-added {friendCode} ({playerName}) — reason: invalid RPC");
+        }
 
         var client = AmongUsClient.Instance.GetClient(player.OwnerId);
         if (client != null)
