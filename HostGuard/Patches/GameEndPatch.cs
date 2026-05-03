@@ -22,7 +22,9 @@ public static class GameEndPatch
         }
 
         HostGuardPlugin.Logger.LogInfo($"[AutoReturn] Scheduling return in {HostGuardConfig.AutoReturnDelay.Value}s...");
-        __instance.StartCoroutine(AutoReturnCoroutine(__instance));
+        // Run coroutine on AmongUsClient which persists across scenes,
+        // unlike EndGameManager which can be destroyed mid-coroutine.
+        AmongUsClient.Instance.StartCoroutine(AutoReturnCoroutine(__instance));
     }
 
     private static IEnumerator AutoReturnCoroutine(EndGameManager manager)
@@ -32,7 +34,14 @@ public static class GameEndPatch
 
         yield return new WaitForSeconds(delay);
 
-        HostGuardPlugin.Logger.LogInfo("[AutoReturn] Clicking to return to lobby");
+        HostGuardPlugin.Logger.LogInfo("[AutoReturn] Timer elapsed, attempting return...");
+
+        // Manager may have been destroyed during the wait
+        if (manager == null)
+        {
+            HostGuardPlugin.Logger.LogWarning("[AutoReturn] EndGameManager destroyed during wait.");
+            yield break;
+        }
 
         var navigation = manager.Navigation;
         if (navigation == null)
@@ -62,6 +71,13 @@ public static class GameEndPatch
         }
 
         yield return new WaitForSeconds(1f);
+
+        // Manager may have been destroyed after first click
+        if (manager == null || navigation == null)
+        {
+            HostGuardPlugin.Logger.LogWarning("[AutoReturn] Manager/Navigation destroyed after first click.");
+            yield break;
+        }
 
         // Click play again (returns to lobby)
         HostGuardPlugin.Logger.LogInfo("[AutoReturn] Calling NextGame()...");
