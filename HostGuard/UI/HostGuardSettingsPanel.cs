@@ -25,6 +25,7 @@ public static class HostGuardSettingsPanel
         // === NAME FILTER ===
         UIFactory.CreateHeader(content.transform, "NAME FILTER", new Vector3(0f, y, -2f));
         y -= 0.45f;
+        CreateToggleRow(content.transform, "Name Filter Enabled", HostGuardConfig.NameFilterEnabled, ref y);
         CreateToggleRow(content.transform, "Kick Default Names", HostGuardConfig.KickDefaultNames, ref y);
         CreateToggleRow(content.transform, "Ban Default Names", HostGuardConfig.BanForDefaultName, ref y);
         CreateToggleRow(content.transform, "Strict Casing", HostGuardConfig.StrictDefaultNameCasing, ref y);
@@ -34,6 +35,7 @@ public static class HostGuardSettingsPanel
         // === CHAT FILTER ===
         UIFactory.CreateHeader(content.transform, "CHAT FILTER", new Vector3(0f, y, -2f));
         y -= 0.45f;
+        CreateToggleRow(content.transform, "Chat Filter Enabled", HostGuardConfig.ChatFilterEnabled, ref y);
         CreateToggleRow(content.transform, "Ban for Banned Words", HostGuardConfig.BanForBannedWords, ref y);
         CreateToggleRow(content.transform, "Contains Mode", HostGuardConfig.ContainsMode, ref y);
         CreateTextRow(content.transform, "Banned Words", HostGuardConfig.BannedWords, ref y);
@@ -41,11 +43,20 @@ public static class HostGuardSettingsPanel
         // === BOT PROTECTION ===
         UIFactory.CreateHeader(content.transform, "BOT PROTECTION", new Vector3(0f, y, -2f));
         y -= 0.45f;
+        CreateToggleRow(content.transform, "Bot Protection Enabled", HostGuardConfig.BotProtectionEnabled, ref y);
         CreateToggleRow(content.transform, "Ban Known Bots", HostGuardConfig.BanKnownBots, ref y);
         CreateToggleRow(content.transform, "Cosmetic Detection", HostGuardConfig.CosmeticDetectionEnabled, ref y);
         CreateToggleRow(content.transform, "Ban Suspicious Cosmetics", HostGuardConfig.BanForSuspiciousCosmetics, ref y);
         CreateTextRow(content.transform, "Known Bot Names", HostGuardConfig.KnownBotNames, ref y);
         CreateTextRow(content.transform, "Known Bot URLs", HostGuardConfig.KnownBotUrls, ref y);
+        CreateTextRow(content.transform, "Suspicious Color IDs (comma-separated)", HostGuardConfig.SuspiciousColorIds, ref y);
+
+        // === MINIMUM LEVEL ===
+        UIFactory.CreateHeader(content.transform, "MINIMUM LEVEL", new Vector3(0f, y, -2f));
+        y -= 0.45f;
+        CreateToggleRow(content.transform, "Min Level Enabled", HostGuardConfig.MinLevelEnabled, ref y);
+        CreateNumberRow(content.transform, "Minimum Level", HostGuardConfig.MinLevel, 1, 100, 1, ref y);
+        CreateToggleRow(content.transform, "Ban for Low Level", HostGuardConfig.BanForLowLevel, ref y);
 
         // === FLOOD PROTECTION ===
         UIFactory.CreateHeader(content.transform, "FLOOD PROTECTION", new Vector3(0f, y, -2f));
