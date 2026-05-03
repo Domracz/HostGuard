@@ -51,6 +51,7 @@ public static class JoinPatch
             bool ban = HostGuardConfig.BanKnownBots.Value;
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — known bot name.");
             ChatHelper.SendLocalMessage($"[Bot] {(ban ? "Banned" : "Kicked")} known bot: {name}");
+            TryAutoBlacklist(code, name, HostGuardConfig.AutoBlacklistKnownBot, "known bot name");
             AmongUsClient.Instance.KickPlayer(data.Id, ban);
             return;
         }
@@ -94,6 +95,7 @@ public static class JoinPatch
             {
                 bool ban = HostGuardConfig.BanForBadName.Value;
                 HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — bad name: '{match}'");
+                TryAutoBlacklist(code, name, HostGuardConfig.AutoBlacklistBadName, "bad name");
                 AmongUsClient.Instance.KickPlayer(data.Id, ban);
                 return;
             }
@@ -104,6 +106,7 @@ public static class JoinPatch
         {
             bool ban = HostGuardConfig.BanForDefaultName.Value;
             HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — default name detected.");
+            TryAutoBlacklist(code, name, HostGuardConfig.AutoBlacklistDefaultName, "default name");
             AmongUsClient.Instance.KickPlayer(data.Id, ban);
             return;
         }
@@ -117,6 +120,7 @@ public static class JoinPatch
                 bool ban = HostGuardConfig.BanForLowLevel.Value;
                 HostGuardPlugin.Logger.LogWarning($"[HostGuard] {(ban ? "Banning" : "Kicking")} {name} ({code}) — level {level} below minimum {minLvl}.");
                 ChatHelper.SendLocalMessage($"[Level] {(ban ? "Banned" : "Kicked")} {name} — level {level} < {minLvl}");
+                TryAutoBlacklist(code, name, HostGuardConfig.AutoBlacklistLowLevel, "low level");
                 AmongUsClient.Instance.KickPlayer(data.Id, ban);
                 return;
             }
@@ -124,6 +128,18 @@ public static class JoinPatch
 
         // Player passed all checks
         CheckAutoStart();
+    }
+
+    static void TryAutoBlacklist(string code, string name, BepInEx.Configuration.ConfigEntry<bool> toggle, string reason)
+    {
+        if (!toggle.Value) return;
+        if (string.IsNullOrEmpty(code) || !code.Contains('#'))
+        {
+            HostGuardPlugin.Logger.LogWarning($"[Blacklist] Skipped auto-blacklist for {name} — no friend code");
+            return;
+        }
+        Blacklist.Add(code);
+        HostGuardPlugin.Logger.LogInfo($"[Blacklist] Auto-added {code} ({name}) — reason: {reason}");
     }
 
     static void CheckAutoStart()

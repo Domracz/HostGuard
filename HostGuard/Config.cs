@@ -74,6 +74,14 @@ public static class HostGuardConfig
     public static ConfigEntry<int> MinLevel = null!;
     public static ConfigEntry<bool> BanForLowLevel = null!;
 
+    // Auto-blacklist toggles
+    public static ConfigEntry<bool> AutoBlacklistBadName = null!;
+    public static ConfigEntry<bool> AutoBlacklistDefaultName = null!;
+    public static ConfigEntry<bool> AutoBlacklistLowLevel = null!;
+    public static ConfigEntry<bool> AutoBlacklistBannedWord = null!;
+    public static ConfigEntry<bool> AutoBlacklistKnownBot = null!;
+    public static ConfigEntry<bool> AutoBlacklistInvalidRpc = null!;
+
     // Lobby
     public static ConfigEntry<bool> AutoReturnToLobby = null!;
     public static ConfigEntry<float> AutoReturnDelay = null!;
@@ -287,6 +295,32 @@ public static class HostGuardConfig
         BanForLowLevel = config.Bind(
             "MinLevel", "BanForLowLevel", false,
             "If true, low-level players get banned. If false, just kicked."
+        );
+
+        // Auto-blacklist toggles
+        AutoBlacklistBadName = config.Bind(
+            "NameFilter", "AutoBlacklistBadName", false,
+            "If true, players kicked/banned for a bad name are also added to the persistent blacklist."
+        );
+        AutoBlacklistDefaultName = config.Bind(
+            "NameFilter", "AutoBlacklistDefaultName", false,
+            "If true, players kicked/banned for a default name are also added to the persistent blacklist."
+        );
+        AutoBlacklistLowLevel = config.Bind(
+            "MinLevel", "AutoBlacklistLowLevel", false,
+            "If true, players kicked/banned for low level are also added to the persistent blacklist."
+        );
+        AutoBlacklistBannedWord = config.Bind(
+            "ChatFilter", "AutoBlacklistBannedWord", false,
+            "If true, players kicked/banned for saying a banned word are also added to the persistent blacklist."
+        );
+        AutoBlacklistKnownBot = config.Bind(
+            "BotProtection", "AutoBlacklistKnownBot", false,
+            "If true, players kicked/banned for a known bot name are also added to the persistent blacklist."
+        );
+        AutoBlacklistInvalidRpc = config.Bind(
+            "AntiCheat", "AutoBlacklistInvalidRpc", false,
+            "If true, players kicked/banned for invalid RPCs are also added to the persistent blacklist."
         );
 
         // Lobby
