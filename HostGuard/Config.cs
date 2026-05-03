@@ -88,6 +88,9 @@ public static class HostGuardConfig
     // Lobby
     public static ConfigEntry<bool> AutoReturnToLobby = null!;
     public static ConfigEntry<float> AutoReturnDelay = null!;
+    public static ConfigEntry<bool> AutoStartIfClosing = null!;
+    public static ConfigEntry<int> AutoStartThreshold = null!;
+    public static ConfigEntry<int> MinPlayersToAutoStart = null!;
 
     private static string _bannedWordsRaw = "";
     private static List<string> _bannedWordsCache = new();
@@ -335,6 +338,18 @@ public static class HostGuardConfig
             "Lobby", "AutoReturnDelay", 3.0f,
             "Seconds to wait after game ends before auto-clicking to return to lobby."
         );
+        AutoStartIfClosing = config.Bind(
+            "Lobby", "AutoStartIfClosing", false,
+            "If true, automatically starts the game when the lobby countdown timer is about to expire."
+        );
+        AutoStartThreshold = config.Bind(
+            "Lobby", "AutoStartThreshold", 30,
+            "Seconds remaining on the lobby timer at which to auto-start."
+        );
+        MinPlayersToAutoStart = config.Bind(
+            "Lobby", "MinPlayersToAutoStart", 1,
+            "Minimum number of players required for lobby-closing auto-start to trigger."
+        );
 
         // UI
         ShowNotifications = config.Bind(
@@ -568,6 +583,9 @@ public static class HostGuardConfig
             // Lobby
             ("Lobby", "Auto-Return to Lobby", AutoReturnToLobby, typeof(bool)),
             ("Lobby", "Auto-Return Delay (sec)", AutoReturnDelay, typeof(float)),
+            ("Lobby", "Auto-Start If Closing", AutoStartIfClosing, typeof(bool)),
+            ("Lobby", "Start Threshold (sec)", AutoStartThreshold, typeof(int)),
+            ("Lobby", "Min Players to Start", MinPlayersToAutoStart, typeof(int)),
 
             // UI
             ("UI", "Show Notifications", ShowNotifications, typeof(bool)),
