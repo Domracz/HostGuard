@@ -418,6 +418,46 @@ public static class HostGuardConfig
         return true;
     }
 
+    public static bool AddContainsBannedWord(string word)
+    {
+        string lower = word.Trim().ToLower();
+        if (lower.Length == 0) return false;
+        var words = GetContainsBannedWords();
+        if (words.Contains(lower)) return false;
+        words.Add(lower);
+        BannedWordsContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool RemoveContainsBannedWord(string word)
+    {
+        string lower = word.Trim().ToLower();
+        var words = GetContainsBannedWords();
+        if (!words.Remove(lower)) return false;
+        BannedWordsContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool AddContainsBannedName(string word)
+    {
+        string lower = word.Trim().ToLower();
+        if (lower.Length == 0) return false;
+        var words = GetContainsBannedNames();
+        if (words.Contains(lower)) return false;
+        words.Add(lower);
+        BannedNamesContains.Value = string.Join(",", words);
+        return true;
+    }
+
+    public static bool RemoveContainsBannedName(string word)
+    {
+        string lower = word.Trim().ToLower();
+        var words = GetContainsBannedNames();
+        if (!words.Remove(lower)) return false;
+        BannedNamesContains.Value = string.Join(",", words);
+        return true;
+    }
+
     public static List<string> GetKnownBotNamesList()
     {
         string raw = KnownBotNames.Value;
