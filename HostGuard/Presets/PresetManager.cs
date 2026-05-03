@@ -117,6 +117,32 @@ public static class PresetManager
         return true;
     }
 
+    public static string GetPresetsDir()
+    {
+        EnsureDirectory();
+        return PresetsDir;
+    }
+
+    public static bool RenamePreset(string oldName, string newName)
+    {
+        string sanitizedNew = SanitizeFileName(newName);
+        if (string.IsNullOrWhiteSpace(sanitizedNew)) return false;
+
+        string oldPath = Path.Combine(PresetsDir, SanitizeFileName(oldName) + ".txt");
+        string newPath = Path.Combine(PresetsDir, sanitizedNew + ".txt");
+
+        if (!File.Exists(oldPath)) return false;
+        if (File.Exists(newPath))
+        {
+            ChatHelper.SendLocalMessage($"[HostGuard] Preset '{newName}' already exists.");
+            return false;
+        }
+
+        File.Move(oldPath, newPath);
+        HostGuardPlugin.Logger.LogInfo($"[HostGuard] Preset renamed: {oldName} -> {newName}");
+        return true;
+    }
+
     private static string SanitizeFileName(string name)
     {
         foreach (char c in Path.GetInvalidFileNameChars())

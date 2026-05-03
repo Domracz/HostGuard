@@ -21,6 +21,9 @@ public static class HostGuardUI
     private static bool _settingsTab = true;
     private static bool _gamePresetsMode = false;
     private static string? _renamingPreset = null;
+    private static string _renameInput = "";
+    private static TextMeshPro? _renameInputTmp = null;
+    private static Action? _renameConfirmAction = null;
 
     // Scroll state
     private static float _scrollY = 0f;
@@ -119,6 +122,37 @@ public static class HostGuardUI
                 _rowsContainer.transform.localPosition = new Vector3(0f, _scrollY, 0f);
                 ClipToViewport();
             }
+        }
+
+        // Rename keyboard input
+        if (_renamingPreset != null && _renameInputTmp != null)
+        {
+            string typed = Input.inputString;
+            for (int ci = 0; ci < typed.Length; ci++)
+            {
+                char c = typed[ci];
+                if (c == '\b') // backspace
+                {
+                    if (_renameInput.Length > 0)
+                        _renameInput = _renameInput.Substring(0, _renameInput.Length - 1);
+                }
+                else if (c == '\r' || c == '\n') // enter
+                {
+                    _renameConfirmAction?.Invoke();
+                    return;
+                }
+                else if (c == 27) // escape
+                {
+                    _renamingPreset = null;
+                    BuildPresets();
+                    return;
+                }
+                else if (!char.IsControl(c))
+                {
+                    _renameInput += c;
+                }
+            }
+            _renameInputTmp.text = "New name: " + _renameInput + "_";
         }
     }
 
@@ -613,25 +647,97 @@ public static class HostGuardUI
 
         y -= 0.38f;
 
+        // Open Folder / Refresh buttons
+        string folderPath = _gamePresetsMode ? GamePresetManager.GetPresetsDir() : PresetManager.GetPresetsDir();
+
+        var openObj = MakeLabel(_presetsContainer.transform, "Open Folder",
+            new Vector3(_panelCX - _panelW * 0.17f, y, -100f), 1.0f, new Color(0.5f, 0.8f, 1f), TextAlignmentOptions.Center, 501);
+        openObj.AddComponent<BoxCollider2D>().size = new Vector2(0.8f, 0.2f);
+        AddButton(openObj).OnClick.AddListener((Action)(() =>
+        {
+            Process.Start("explorer.exe", folderPath);
+            ChatHelper.SendLocalMessage("[HostGuard] Preset folder opened.");
+        }));
+
+        var refreshObj = MakeLabel(_presetsContainer.transform, "Refresh",
+            new Vector3(_panelCX + _panelW * 0.17f, y, -100f), 1.0f, new Color(1f, 0.8f, 0.3f), TextAlignmentOptions.Center, 501);
+        refreshObj.AddComponent<BoxCollider2D>().size = new Vector2(0.6f, 0.2f);
+        AddButton(refreshObj).OnClick.AddListener((Action)(() =>
+        {
+            _renamingPreset = null;
+            BuildPresets();
+            ChatHelper.SendLocalMessage("[HostGuard] Preset list refreshed.");
+        }));
+
+        y -= 0.32f;
+
         // Preset list
         var presets = _gamePresetsMode ? GamePresetManager.GetPresetNames() : PresetManager.GetPresetNames();
 
         if (presets.Count == 0)
         {
-            MakeLabel(_presetsContainer.transform, "No presets yet.",
-                new Vector3(_panelCX, y, -100f), 1.2f, Dim, TextAlignmentOptions.Center, 501);
+            MakeLabel(_presetsContainer.transform, "No presets yet.\nDrop .txt files into the folder, then press Refresh.",
+                new Vector3(_panelCX, y, -100f), 1.0f, Dim, TextAlignmentOptions.Center, 501);
         }
         else
         {
             for (int idx = 0; idx < presets.Count; idx++)
             {
                 string n = presets[idx];
+
+                // If renaming this preset, show input row instead
+                if (_renamingPreset == n)
+                {
+                    _renameInput = "";
+                    var inputLabel = MakeLabel(_presetsContainer.transform, "New name: _",
+                        new Vector3(_panelLeft + 0.15f, y, -100f), 1.0f, Color.yellow, TextAlignmentOptions.Left, 501);
+                    _renameInputTmp = inputLabel.GetComponent<TextMeshPro>();
+
+                    string capturedName = n;
+                    _renameConfirmAction = () =>
+                    {
+                        if (string.IsNullOrWhiteSpace(_renameInput))
+                        {
+                            ChatHelper.SendLocalMessage("[HostGuard] Name cannot be empty.");
+                            return;
+                        }
+                        bool ok = _gamePresetsMode
+                            ? GamePresetManager.RenamePreset(capturedName, _renameInput)
+                            : PresetManager.RenamePreset(capturedName, _renameInput);
+                        if (ok)
+                            ChatHelper.SendLocalMessage($"[HostGuard] Preset renamed to '{_renameInput}'.");
+                        _renamingPreset = null;
+                        _renameInputTmp = null;
+                        _renameConfirmAction = null;
+                        BuildPresets();
+                    };
+
+                    var confirmObj = MakeLabel(_presetsContainer.transform, "OK",
+                        new Vector3(_panelCX + _panelW * 0.3f, y, -100f), 1.0f, Color.green, TextAlignmentOptions.Center, 501);
+                    confirmObj.AddComponent<BoxCollider2D>().size = new Vector2(0.3f, 0.2f);
+                    AddButton(confirmObj).OnClick.AddListener((Action)(() => _renameConfirmAction?.Invoke()));
+
+                    var cancelObj = MakeLabel(_presetsContainer.transform, "X",
+                        new Vector3(_panelCX + _panelW * 0.42f, y, -100f), 1.0f, Palette.ImpostorRed, TextAlignmentOptions.Center, 501);
+                    cancelObj.AddComponent<BoxCollider2D>().size = new Vector2(0.25f, 0.2f);
+                    AddButton(cancelObj).OnClick.AddListener((Action)(() =>
+                    {
+                        _renamingPreset = null;
+                        _renameInputTmp = null;
+                        _renameConfirmAction = null;
+                        BuildPresets();
+                    }));
+
+                    y -= 0.28f;
+                    continue;
+                }
+
                 MakeLabel(_presetsContainer.transform, n, new Vector3(_panelLeft + 0.15f, y, -100f),
                     1.1f, Color.white, TextAlignmentOptions.Left, 501);
 
                 var loadObj = MakeLabel(_presetsContainer.transform, "Load",
-                    new Vector3(_panelCX + _panelW * 0.2f, y, -100f), 1.0f, Color.green, TextAlignmentOptions.Center, 501);
-                loadObj.AddComponent<BoxCollider2D>().size = new Vector2(0.5f, 0.2f);
+                    new Vector3(_panelCX + _panelW * 0.1f, y, -100f), 1.0f, Color.green, TextAlignmentOptions.Center, 501);
+                loadObj.AddComponent<BoxCollider2D>().size = new Vector2(0.4f, 0.2f);
                 AddButton(loadObj).OnClick.AddListener((Action)(() =>
                 {
                     if (_gamePresetsMode)
@@ -651,8 +757,18 @@ public static class HostGuardUI
                     }
                 }));
 
+                string renameTarget = n;
+                var renObj = MakeLabel(_presetsContainer.transform, "Ren",
+                    new Vector3(_panelCX + _panelW * 0.27f, y, -100f), 1.0f, new Color(1f, 0.8f, 0.3f), TextAlignmentOptions.Center, 501);
+                renObj.AddComponent<BoxCollider2D>().size = new Vector2(0.35f, 0.2f);
+                AddButton(renObj).OnClick.AddListener((Action)(() =>
+                {
+                    _renamingPreset = renameTarget;
+                    BuildPresets();
+                }));
+
                 var delObj = MakeLabel(_presetsContainer.transform, "X",
-                    new Vector3(_panelCX + _panelW * 0.4f, y, -100f), 1.0f, Palette.ImpostorRed, TextAlignmentOptions.Center, 501);
+                    new Vector3(_panelCX + _panelW * 0.42f, y, -100f), 1.0f, Palette.ImpostorRed, TextAlignmentOptions.Center, 501);
                 delObj.AddComponent<BoxCollider2D>().size = new Vector2(0.25f, 0.2f);
                 AddButton(delObj).OnClick.AddListener((Action)(() =>
                 {
@@ -721,5 +837,6 @@ public static class HostGuardUI
         if (_lobbyButton != null) Object.Destroy(_lobbyButton);
         _panel = null; _lobbyButton = null; _rowsContainer = null; _presetsContainer = null;
         _refreshCbs.Clear(); _camReady = false;
+        _renamingPreset = null; _renameInput = ""; _renameInputTmp = null; _renameConfirmAction = null;
     }
 }
