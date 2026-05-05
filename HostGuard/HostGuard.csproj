@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Reactor" Version="2.5.0-ci.371" />
+        <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.755" />
 
         <!-- Reference the game's generated interop assemblies -->
         <Reference Include="Assembly-CSharp">
