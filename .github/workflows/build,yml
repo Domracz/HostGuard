@@ -1,0 +1,37 @@
+name: Build HostGuard
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build HostGuard
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload HostGuard DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: HostGuard
+          path: |
+            **/bin/Release/**/HostGuard.dll
