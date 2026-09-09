@@ -28,7 +28,7 @@ public static class GamePresetManager
     public static bool SavePreset(string name)
     {
         EnsureDirectory();
-        var opts = GameOptionsManager.Instance?.currentNormalGameOptions;
+        var opts = GameOptionsManager.Instance?.CurrentGameOptions;
         if (opts == null)
         {
             HostGuardPlugin.Logger.LogWarning("[HostGuard] Cannot save game preset — game options not available.");
@@ -70,7 +70,7 @@ public static class GamePresetManager
         string path = Path.Combine(PresetsDir, SanitizeFileName(name) + ".txt");
         if (!File.Exists(path)) return false;
 
-        var opts = GameOptionsManager.Instance?.currentNormalGameOptions;
+        var opts = GameOptionsManager.Instance?.CurrentGameOptions;
         if (opts == null)
         {
             HostGuardPlugin.Logger.LogWarning("[HostGuard] Cannot load game preset — game options not available.");
